@@ -1,12 +1,12 @@
 <template>
-  <div id="App">
-    <router-view></router-view>
+  <div class="poster">
+    海报设置
   </div>
 </template>
 
 <script>
   export default {
-    name: 'App'
+    name: 'poster'
   }
 </script>
 

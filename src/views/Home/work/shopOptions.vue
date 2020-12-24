@@ -1,12 +1,12 @@
 <template>
-  <div id="App">
-    <router-view></router-view>
+  <div class="shopOptions">
+    商铺选项
   </div>
 </template>
 
 <script>
   export default {
-    name: 'App'
+    name: 'shopOptions'
   }
 </script>
 

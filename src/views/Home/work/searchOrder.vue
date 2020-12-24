@@ -1,12 +1,12 @@
 <template>
-  <div id="App">
-    <router-view></router-view>
+  <div class="searchOrder">
+    订单查询
   </div>
 </template>
 
 <script>
   export default {
-    name: 'App'
+    name: 'searchOrder'
   }
 </script>
 
