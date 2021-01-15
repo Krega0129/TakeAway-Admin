@@ -1,6 +1,6 @@
 <template>
   <v-app class="admin">
-    <v-navigation-drawer app absolute width="180" v-model="drawer" color="blue-grey darken-3" stateless>
+    <v-navigation-drawer app fixed width="180" v-model="drawer" color="blue-grey darken-3" stateless>
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="title text-center white--text pt-2 pb-5">
@@ -16,14 +16,14 @@
                     </v-list-item-content>
                   </template>
 
-                  <v-list-item v-for="subItem in item.items" :to="subItem.route" :key="subItem.title" @click="navigate" class="blue-grey darken-4">
+                  <v-list-item v-for="subItem in item.items" :to="subItem.route" :key="subItem.title" class="blue-grey darken-4">
                     <v-list-item-content>
                       <v-list-item-title v-text="subItem.title" class="text-caption"></v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
                 </v-list-group>
 
-                <v-list-item v-else @click="navigate" :to="item.route">
+                <v-list-item v-else :to="item.route">
                   <v-list-item-content class="pl-4">
                     <v-list-item-title v-text="item.title" class="text-caption"></v-list-item-title>
                   </v-list-item-content>
@@ -57,7 +57,7 @@
         <v-icon>mdi-dots-vertical</v-icon>
       </v-btn>
     </v-app-bar>
-    <v-main>
+    <v-main class="main">
       <v-container fluid>
         <router-view></router-view>
       </v-container>
@@ -153,10 +153,19 @@
     components: {
       
     },
-    methods: {
-      navigate() {
-
+    mounted() {
+      // 刷新页面返回资金管理页面
+      this.title = this.$route.meta.title
+    },
+    watch: {
+      $route: {
+        handler(val, oldval) {
+          this.title = val.meta.title
+        }
       }
+    },
+    methods: {
+      
     }
   }
 </script>
@@ -178,5 +187,10 @@
     .mdi-chevron-down::before {
       color: white;
     }
+  }
+
+  .main {
+    height: 100vh;
+    // overflow-y: scroll;
   }
 </style>
