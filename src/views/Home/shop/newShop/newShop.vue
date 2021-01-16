@@ -1,8 +1,8 @@
 <template>
-  <div class="shopRenewInfo">
+  <div class="newShop">
     <v-data-table
       :headers="header"
-      :items="desserts"
+      :items="shops"
       class="elevation-1"
       :search="search"
       no-data-text="没有数据"
@@ -12,7 +12,7 @@
       :items-per-page="5"
       :single-select="singleSelect"
       v-model="selected"
-      v-if="this.$route.meta.title === '修改审核'"
+      v-if="this.$route.meta.title === '新店申请'"
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -31,7 +31,7 @@
             class="mt-6"
             :items="selectItem"
             style="width: 30px"
-            label="待审核"
+            label="请选择校区"
             solo
           ></v-select>
 
@@ -103,36 +103,22 @@
           审核通过
         </v-btn>
       </template>
-      <!-- <template v-slot:no-data>
-        <v-btn
-          color="primary"
-          @click="initialize"
-        >
-          Reset
-        </v-btn>
-      </template> -->
     </v-data-table>
     <router-view v-else></router-view>
   </div>
 </template>
 
 <script>
-  import { reviewDetails } from '../../../network/shop'
-
   export default {
-    data () {
+    name: 'newShop',
+    data() {
       return {
-        // 已经选择的数据
         selected: [],
-        // 单选
         singleSelect: false,
         multiSelect: false,
-        // 搜索文本
         search: '',
-        selectItem: [ '待审核', '已审核', '已通过', '未通过' ],
-        // 通过审核
+        selectItem: [ '广工', '广大' ],
         passReview: false,
-        // 表头
         header: [
           {
             text: '店铺名称',
@@ -148,9 +134,7 @@
             sortable: false 
           },
         ],
-        // 数据列表
-        desserts: [],
-        // 点击的数据索引
+        shops: [],
         editedIndex: -1
       }
     },
@@ -159,13 +143,9 @@
       reviewDetails({auditStatus: 1}).then(res => {
         console.log(res);
         if(res.code == 1200) {
-          // this.desserts = res.data
           this.initialize()
         }
       })
-    },
-    computed: {
-      
     },
     watch: {
       selected (val) {
@@ -180,9 +160,8 @@
           typeof value === 'string' &&
           value.toString().indexOf(search) !== -1
       },
-
       initialize () {
-        this.desserts = [
+        this.shops = [
           {
             shopName: '15',
           },
@@ -232,16 +211,16 @@
       },
       // 详情
       editItem (item) {
-        this.$router.push('shopRenewInfo/shopRenewDetails')
+        this.$router.push('newShop/newShopInfo')
       },
       // 审核
       review (item) {
-        this.editedIndex = this.desserts.indexOf(item)
+        this.editedIndex = this.shops.indexOf(item)
         this.passReview = true
       },
       // 确定
       confirmReview () {
-        this.desserts.splice(this.editedIndex, 1)
+        this.shops.splice(this.editedIndex, 1)
         this.passReview = false
         console.log('审核通过了');
       },
@@ -257,10 +236,6 @@
       reviewMultiOut() {
         console.log('批量淘汰');
       }
-    },
+    }
   }
 </script>
-
-<style lang="sass" scoped>
-
-</style>

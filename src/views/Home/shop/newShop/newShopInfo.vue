@@ -1,5 +1,5 @@
 <template>
-  <div class="newShop">
+  <div class="newShopInfo">
     <v-data-table
       :headers="headers"
       :items="shopInfo"
@@ -43,7 +43,7 @@
 
 <script>
   export default {
-    name: 'newShop',
+    name: 'newShopInfo',
     data() {
       return {
         passReview: false,

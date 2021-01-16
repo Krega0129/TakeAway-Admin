@@ -1,27 +1,39 @@
 <template>
-  <div class="user">
+  <div class="riderVerify">
     <v-data-table
       :headers="headers"
-      :items="users"
+      :items="riders"
       class="elevation-1"
       :search="search"
       no-data-text="没有数据"
       :custom-filter="filterOnlyCapsText"
-      item-key="userName"
-      :items-per-page="5"
       :show-select="multiSelect"
+      item-key="riderName"
+      :items-per-page="5"
       :single-select="singleSelect"
       v-model="selected"
-      v-if="this.$route.meta.title === '分享校园'"
+      v-if="this.$route.meta.title === '信息审核'"
     >
       <template v-slot:top>
         <v-toolbar flat>
           <v-text-field
             v-model="search"
             append-icon="mdi-magnify"
-            label="搜索记录"
+            label="搜索"
             class="mt-6"
           ></v-text-field>
+          
+          <v-spacer></v-spacer>
+
+          <v-select
+            dense
+            class="mt-6"
+            :items="selectItem"
+            style="width: 30px"
+            label="请选择校区"
+            solo
+          ></v-select>
+
           <v-spacer></v-spacer>
 
           <v-btn
@@ -47,16 +59,19 @@
           >
             批量淘汰
           </v-btn>
-        </v-toolbar>
-      </template>
 
-      <template v-slot:[`item.img`]="{ item }">
-        <v-img
-          class="my-1"
-          max-width="50"
-          max-height="50"
-          :src="item.img"
-        ></v-img>
+          <v-dialog v-model="reviewRider" max-width="500px">
+            <v-card>
+              <v-card-title class="headline">确定通过审核?</v-card-title>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="cancelReview">取消</v-btn>
+                <v-btn color="blue darken-1" text @click="confirmReview">确定</v-btn>
+                <v-spacer></v-spacer>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-toolbar>
       </template>
       
       <template v-slot:[`item.actions`]="{ item }">
@@ -64,7 +79,7 @@
           small
           dark
           class="mx-2"
-          @click="reviewUser(item)">
+          @click="riderDetails(item)">
         <v-icon
           small
           class="mr-2"
@@ -81,83 +96,73 @@
 
 <script>
   export default {
-    name: 'user',
+    name: 'riderVerify',
     data() {
       return {
         headers: [
           {
-            text: '用户名',
+            text: '骑手姓名',
             align: 'start',
             sortable: false,
-            value: 'userName'
+            value: 'riderName'
           },
           {
-            text: '账号',
+            text: '骑手电话',
             align: 'center',
             sortable: false,
-            value: 'userAccount'
+            value: 'riderTel'
           },
           {
-            text: '图片',
-            align: 'start',
-            sortable: false,
-            value: 'img'
-          },
-          {
-            text: '内容',
+            text: '详情',
             align: 'center',
             sortable: false,
-            width: 400,
-            value: 'content'
+            value: 'actions',
+            width: 200
           },
-          {
-            text: '操作',
-            align: 'center',
-            sortable: false,
-            value: 'actions'
-          }
         ],
-        users: [
+        riders: [
           {
-            userName: '啊强',
-            userAccount: '11111111111',
-            content: '啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
-            img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
+            riderName: '啊强',
+            riderTel: '111111111111'
           },
           {
-            userName: '啊龙',
-            userAccount: '11111111111',
-            content: 'asdhgakdgrgirtyrhhg',
-            img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
-          },
-          {
-            userName: '啊锴',
-            userAccount: '11111111111',
-            content: 'asdhgakdgrgirtyrhhg',
-            img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
+            riderName: '啊龙',
+            riderTel: '222222222222'
           }
         ],
         search: '',
+        reviewRider: false,
+        editIndex: -1,
         multiSelect: false,
         singleSelect: false,
-        selected: []
+        selected: [],
+        selectItem: ['广工', '广大']
       }
     },
     methods: {
       filterOnlyCapsText(value, search, item) {
-      return value != null &&
-        search != null &&
-        typeof value === 'string' &&
-        value.toString().indexOf(search) !== -1;
+        return value != null &&
+          search != null &&
+          typeof value === 'string' &&
+          value.toString().indexOf(search) !== -1;
       },
-      reviewUser(item) {
-        this.orderIndex = this.users.indexOf(item)
-        this.$router.push('user/reviewUser')
+      riderDetails(item) {
+        this.editIndex = this.riders.indexOf(item)
+        this.$router.push('riderVerify/riderDetails')
+      },
+      cancelReview() {
+        this.editIndex = -1;
+        this.deleteShop = false
+      },
+      confirmReview() {
+        this.riders.slice(this.editIndex, 1)
+        this.editIndex = -1;
+        this.deleteShop = false
       },
       reviewMultiPass() {
         console.log('批量通过');
       },
-      reviewMultiPass() {
+      reviewMultiOut() {
         console.log('批量淘汰');
       }
     }

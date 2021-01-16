@@ -5,20 +5,26 @@ const Admin = () => import('@/views/admin');
 const Login = () => import('@/views/login');
 
 const Money = () => import('@/views/Home/work/money');
-const Campus = () => import('@/views/Home/work/campus');
+const Campus = () => import('@/views/Home/work/campus/campus');
+const CampusDetails = () => import('@/views/Home/work/campus/campusDetails')
 const Poster = () => import('@/views/Home/work/poster');
 const SearchOrder = () => import('@/views/Home/work/searchOrder');
-const ShopOptions = () => import('@/views/Home/work/shopOptions');
+const OrderDetails = () => import('@/views/Home/work/orderDetails');
 
-const NewShop = () => import('@/views/Home/shop/newShop');
+const NewShop = () => import('@/views/Home/shop/newShop/newShop');
+const NewShopInfo = () => import('@/views/Home/shop/newShop/newShopInfo')
 const ShopRenewInfo = () => import('@/views/Home/shop/shopRenewInfo');
-const CheckShop = () => import('@/views/Home/shop/checkShop');
+const ShopInfo = () => import('@/views/Home/shop/shopInfo/shopInfo');
 const ShopRenewDetails = () => import('@/views/Home/shop/shopRenewDetails')
+const ShopList = () => import('@/views/Home/shop/shopInfo/shopList')
 
-const RiderVerify = () => import('@/views/Home/rider/riderVerify');
-const BanAccount = () => import('@/views/Home/rider/banAccount');
+const RiderVerify = () => import('@/views/Home/rider/riderVerify/riderVerify');
+const RiderDetails = () => import('@/views/Home/rider/riderVerify/riderDetails');
+const RiderManage = () => import('@/views/Home/rider/riderManage/riderManage')
+const BanAccount = () => import('@/views/Home/rider/riderManage/banAccount');
 
 const User = () => import('@/views/Home/user/user');
+const ReviewUser = () => import('@/views/Home/user/reviewUser')
 
 Vue.use(VueRouter)
 
@@ -39,7 +45,16 @@ const adminRoute = [
     meta: {
       title: '设置校区'
     },
-    component: Campus
+    component: Campus,
+    children: [
+      {
+        path: 'campusDetails',
+        meta: {
+          title: '校区详情'
+        },
+        component: CampusDetails
+      }
+    ]
   },
   {
     path: 'poster',
@@ -53,64 +68,112 @@ const adminRoute = [
     meta: {
       title: '订单查询'
     },
-    component: SearchOrder
-  },
-  {
-    path: 'shopOptions',
-    meta: {
-      title: '店铺选项'
-    },
-    component: ShopOptions
+    component: SearchOrder,
+    children: [
+      {
+        path: 'orderDetails',
+        meta: {
+          title: '订单详情'
+        },
+        component: OrderDetails
+      },
+    ]
   },
   {
     path: 'newShop',
     meta: {
       title: '新店申请'
     },
-    component: NewShop
+    component: NewShop,
+    children: [
+      {
+        path: 'newShopInfo',
+        meta: {
+          title: '店铺审核信息'
+        },
+        component: NewShopInfo
+      }
+    ]
   },
   {
     path: 'shopRenewInfo',
     meta: {
       title: '修改审核'
     },
-    component: ShopRenewInfo
+    component: ShopRenewInfo,
+    children: [
+      {
+        path: 'shopRenewDetails',
+        meta: {
+          title: '审核信息详情'
+        },
+        component: ShopRenewDetails
+      },
+    ]
   },
   {
-    path: 'checkShop',
+    path: 'shopList',
     meta: {
       title: '查看信息'
     },
-    component: CheckShop
+    component: ShopList,
+    children: [
+      {
+        path: 'shopInfo',
+        meta: {
+          title: '店铺详情'
+        },
+        component: ShopInfo
+      }
+    ]
   },
   {
     path: 'riderVerify',
     meta: {
       title: '信息审核'
     },
-    component: RiderVerify
+    component: RiderVerify,
+    children: [
+      {
+        path: 'riderDetails',
+        meta: {
+          title: '骑手详情'
+        },
+        component: RiderDetails,
+      }
+    ]
   },
   {
-    path: 'banAccount',
+    path: 'riderManage',
     meta: {
-      title: '封停账号'
+      title: '骑手管理'
     },
-    component: BanAccount
+    component: RiderManage,
+    children: [
+      {
+        path: 'banAccount',
+        meta: {
+          title: '账号管理'
+        },
+        component: BanAccount
+      }
+    ]
   },
   {
     path: 'user',
     meta: {
       title: '分享校园'
     },
-    component: User
-  },
-
-  {
-    path: 'shopRenewDetails',
-    meta: {
-      title: '审核信息详情'
-    },
-    component: ShopRenewDetails
+    component: User,
+    children: [
+      {
+        path: 'reviewUser',
+        meta: {
+          title: '分享校园审核'
+        },
+        component: ReviewUser
+      }
+    ]
   }
 ]
 

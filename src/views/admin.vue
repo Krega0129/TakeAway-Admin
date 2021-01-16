@@ -88,11 +88,6 @@
                 route: '/admin/searchOrder'
               },
               {
-                action: '店铺选项',
-                title: '店铺选项',
-                route: '/admin/shopOptions'
-              },
-              {
                 action: '海报',
                 title: '海报',
                 route: '/admin/poster'
@@ -121,7 +116,7 @@
               {
                 action: '查看信息',
                 title: '查看信息',
-                route: '/admin/checkShop'
+                route: '/admin/shopList'
               }
             ]
           },
@@ -135,9 +130,9 @@
                 route: '/admin/riderVerify'
               },
               {
-                action: '封停账号',
-                title: '封停账号',
-                route: '/admin/banAccount'
+                action: '骑手管理',
+                title: '骑手管理',
+                route: '/admin/riderManage'
               }
             ]
           },
