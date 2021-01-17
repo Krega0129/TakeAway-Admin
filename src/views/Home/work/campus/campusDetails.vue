@@ -70,7 +70,7 @@
         </v-btn>
         <v-btn 
             small
-            dark
+            color="error"
             class="mx-2"
             @click="deShop(item)">
           <v-icon
@@ -99,6 +99,12 @@
             value: 'shopName'
           },
           {
+            text: '营业状态',
+            align: 'start',
+            sortable: false,
+            value: 'shopStatus'
+          },
+          {
             text: '详情',
             align: 'center',
             sortable: false,
@@ -108,10 +114,12 @@
         ],
         shop: [
           {
-            shopName: '广工三饭'
+            shopName: '广工三饭',
+            shopStatus: '营业中'
           },
           {
-            shopName: '广工四饭'
+            shopName: '广工四饭',
+            shopStatus: '未营业'
           }
         ],
         search: '',

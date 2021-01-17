@@ -186,6 +186,6 @@
 
   .main {
     height: 100vh;
-    // overflow-y: scroll;
+    min-width: 600px;
   }
 </style>

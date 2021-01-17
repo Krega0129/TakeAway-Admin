@@ -22,10 +22,8 @@
             label="搜索"
             class="mt-6"
           ></v-text-field>
-          
+
           <v-spacer></v-spacer>
-
-
 
           <v-dialog
             v-model="dialog"
@@ -49,12 +47,14 @@
 
               <v-card-text>
                 <v-container>
-                  <v-row>
                     <v-text-field
                       v-model="editedItem.campusName"
                       label="校区名"
                     ></v-text-field>
-                  </v-row>
+                    <v-text-field
+                      v-model="editedItem.deliverFee"
+                      label="配送费"
+                    ></v-text-field>
                 </v-container>
               </v-card-text>
 
@@ -80,11 +80,11 @@
 
           <v-dialog v-model="deleteCampus" max-width="500px">
             <v-card>
-              <v-card-title class="headline">确定删除该校区?</v-card-title>
+              <v-card-title class="headline">确定删除该校区?删除后校区里面的商家也会退出!</v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="cancelDelete">取消</v-btn>
-                <v-btn color="blue darken-1" text @click="confirmDelete">确定</v-btn>
+                <v-btn color="red" text @click="confirmDelete">确定</v-btn>
                 <v-spacer></v-spacer>
               </v-card-actions>
             </v-card>
@@ -151,6 +151,12 @@
             value: 'campusName'
           },
           {
+            text: '配送费',
+            align: 'start',
+            sortable: true,
+            value: 'deliverFee'
+          },
+          {
             text: '商家数量',
             align: 'start',
             sortable: true,
@@ -167,10 +173,12 @@
         campus: [
           {
             campusName: '广东工业大学',
+            deliverFee: 1,
             shopNum: 10
           },
           {
             campusName: '广州大学',
+            deliverFee: 2,
             shopNum: 20
           }
         ],
@@ -183,6 +191,7 @@
         editedIndex: -1,
         editedItem: {
           campusName: '',
+          deliverFee: 0,
           shopNum: 0
         },
 
@@ -224,6 +233,7 @@
         this.dialog = false
         this.$nextTick(() => {
           this.editedItem.campusName = ''
+          this.editedItem.deliverFee = 0
           this.editedIndex = -1
         })
       },

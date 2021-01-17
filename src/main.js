@@ -4,6 +4,9 @@ import router from './router'
 import store from './store'
 import vuetify from '@/plugins/vuetify'
 
+
+// Vue.prototype.$echarts = echarts
+
 Vue.config.productionTip = false
 
 new Vue({
