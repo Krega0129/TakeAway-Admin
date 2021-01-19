@@ -1,14 +1,22 @@
 <template>
   <div class="shopRenewInfo">
+
+    <component
+      :is="tip"
+      :alertText="alertText"
+      :alertType="alertType"
+      :showTip="show"
+    ></component>
+
     <v-data-table
-      :headers="header"
+      :headers="headers"
       :items="desserts"
       class="elevation-1"
       :search="search"
       no-data-text="没有数据"
       :custom-filter="filterOnlyCapsText"
       :show-select="multiSelect"
-      item-key="shopName"
+      item-key="updateId"
       :items-per-page="5"
       :single-select="singleSelect"
       v-model="selected"
@@ -103,21 +111,18 @@
           审核通过
         </v-btn>
       </template>
-      <!-- <template v-slot:no-data>
-        <v-btn
-          color="primary"
-          @click="initialize"
-        >
-          Reset
-        </v-btn>
-      </template> -->
     </v-data-table>
     <router-view v-else></router-view>
   </div>
 </template>
 
 <script>
-  import { reviewDetails } from '../../../network/shop'
+  import { 
+    reviewDetails,
+  } from '../../../../network/shop'
+
+  import tip from '../../../../components/tip';
+  import { showTip } from '../../../../utils';
 
   export default {
     data () {
@@ -129,16 +134,22 @@
         multiSelect: false,
         // 搜索文本
         search: '',
-        selectItem: [ '待审核', '已审核', '已通过', '未通过' ],
+        selectItem: [ '待审核', '已通过', '未通过' ],
         // 通过审核
         passReview: false,
         // 表头
-        header: [
+        headers: [
           {
             text: '店铺名称',
             align: 'start',
             sortable: false,
             value: 'shopName',
+          },
+          {
+            text: '修改时间',
+            align: 'start',
+            sortable: false,
+            value: 'auditTime',
           },
           { 
             text: '审核', 
@@ -146,26 +157,40 @@
             width: 300,
             align: 'center',
             sortable: false 
-          },
+          }
         ],
         // 数据列表
         desserts: [],
         // 点击的数据索引
-        editedIndex: -1
+        editedIndex: -1,
+        shopList: [],
+        alertText: '',
+        alertType: 'success',
+        show: false
       }
     },
+    components: {
+      tip,
+    },
     mounted() {
-      this.initialize()
-      reviewDetails({auditStatus: 1}).then(res => {
+      reviewDetails({
+        auditStatus: 0,
+        pageNum: 1,
+        pageSize: 100
+      }).then(res => {
         console.log(res);
         if(res.code == 1200) {
-          // this.desserts = res.data
-          this.initialize()
+          this.shopList = res.data.list
+          for(let item of this.shopList) {
+            this.desserts.push(item[0])
+          }
         }
       })
     },
     computed: {
-      
+      tip() {
+        return 'tip'
+      }
     },
     watch: {
       selected (val) {
@@ -180,58 +205,14 @@
           typeof value === 'string' &&
           value.toString().indexOf(search) !== -1
       },
-
-      initialize () {
-        this.desserts = [
-          {
-            shopName: '15',
-          },
-          {
-            shopName: '14',
-          },
-          {
-            shopName: '13',
-          },
-          {
-            shopName: '12',
-          },
-          {
-            shopName: '11',
-          },
-          {
-            shopName: '10',
-          },
-          {
-            shopName: '9',
-          },
-          {
-            shopName: '8',
-          },
-          {
-            shopName: '7',
-          },
-          {
-            shopName: '6',
-          },
-          {
-            shopName: '5',
-          },
-          {
-            shopName: '4',
-          },
-          {
-            shopName: '3',
-          },
-          {
-            shopName: '2',
-          },
-          {
-            shopName: '1',
-          }
-        ]
-      },
       // 详情
       editItem (item) {
+        // 获取索引
+        this.editedIndex = this.desserts.indexOf(item)
+        this.$store.commit('changeShopInfo', {
+          shopNewInfo: this.shopList[this.editedIndex][0],
+          shopOldInfo: this.shopList[this.editedIndex][1]
+        })
         this.$router.push('shopRenewInfo/shopRenewDetails')
       },
       // 审核
@@ -243,12 +224,12 @@
       confirmReview () {
         this.desserts.splice(this.editedIndex, 1)
         this.passReview = false
-        console.log('审核通过了');
+        showTip.call(this, '审核通过')
       },
       // 取消
       cancelReview () {
         this.passReview = false
-        console.log('取消了');
+        showTip.call(this, '审核已取消', 'error')
       },
       // 多选通过
       reviewMultiPass() {

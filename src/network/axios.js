@@ -1,12 +1,14 @@
 import originAxios from 'axios'
 import qs from 'qs'
+import { BASE_URL } from './config'
 // const token = sessionStorage.getItem('token') || null
 export default function axios(option) {
   return new Promise((resolve, reject) => {
     // 1.创建axios的实例
     const instance = originAxios.create({
       withCredentials: true,
-      baseURL: 'https://www.lizeqiang.top:8888',
+      baseURL: BASE_URL,
+      // baseURL: 'https://longdongwu.free.idcfengye.com',
       timeout: 5000
     });
 

@@ -1,5 +1,13 @@
 <template>
   <div class="newShop">
+
+    <component
+      :is="tip"
+      :alertText="alertText"
+      :alertType="alertType"
+      :showTip="show"
+    ></component>
+
     <v-data-table
       :headers="header"
       :items="shops"
@@ -109,6 +117,14 @@
 </template>
 
 <script>
+  import {
+    reviewNewShop,
+    getShop,
+    
+  } from '../../../../network/shop'
+  import tip from '../../../../components/tip';
+  import { showTip } from '../../../../utils';
+
   export default {
     name: 'newShop',
     data() {
@@ -135,21 +151,26 @@
           },
         ],
         shops: [],
-        editedIndex: -1
+        editedIndex: -1,
+        alertText: '',
+        alertType: 'success',
+        show: false
       }
+    },
+    components: {
+      tip,
     },
     mounted() {
       this.initialize()
-      reviewDetails({auditStatus: 1}).then(res => {
-        console.log(res);
-        if(res.code == 1200) {
-          this.initialize()
-        }
-      })
     },
     watch: {
       selected (val) {
         console.log(val);
+      }
+    },
+    computed: {
+      tip() {
+        return 'tip'
       }
     },
     methods: {
@@ -222,12 +243,16 @@
       confirmReview () {
         this.shops.splice(this.editedIndex, 1)
         this.passReview = false
-        console.log('审核通过了');
+        reviewNewShop({
+          auditStatus: 1,
+          
+        })
+        showTip.call(this, '审核已通过')
       },
       // 取消
       cancelReview () {
         this.passReview = false
-        console.log('取消了');
+        showTip.call(this, '审核已取消')
       },
       // 多选通过
       reviewMultiPass() {

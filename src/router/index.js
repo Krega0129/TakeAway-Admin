@@ -13,9 +13,9 @@ const OrderDetails = () => import('@/views/Home/work/orderDetails');
 
 const NewShop = () => import('@/views/Home/shop/newShop/newShop');
 const NewShopInfo = () => import('@/views/Home/shop/newShop/newShopInfo')
-const ShopRenewInfo = () => import('@/views/Home/shop/shopRenewInfo');
+const ShopRenewInfo = () => import('@/views/Home/shop/shopRenewInfo/shopRenewInfo');
 const ShopInfo = () => import('@/views/Home/shop/shopInfo/shopInfo');
-const ShopRenewDetails = () => import('@/views/Home/shop/shopRenewDetails')
+const ShopRenewDetails = () => import('@/views/Home/shop/shopRenewInfo/shopRenewDetails')
 const ShopList = () => import('@/views/Home/shop/shopInfo/shopList')
 
 const RiderVerify = () => import('@/views/Home/rider/riderVerify/riderVerify');

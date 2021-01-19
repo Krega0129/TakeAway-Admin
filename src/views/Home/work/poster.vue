@@ -61,10 +61,46 @@
             flat
           >
             <v-spacer></v-spacer>
-            <v-btn 
-              class="mx-2" 
-              color="success"
-            >新增</v-btn>
+            <v-dialog
+              max-width="500px"
+              v-model="newDialog"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  class="mx-2"
+                  v-bind="attrs"
+                  color="success"
+                  v-on="on"
+                >
+                  新增
+                </v-btn>
+              </template>
+              <v-card
+                class="mx-auto pa-3 text-right"
+              >
+                <v-file-input
+                  accept="image/*"
+                  label="上传图片"
+                  v-model="img"
+                ></v-file-input>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="error"
+                  class="mx-2"
+                  @click="cancelUpload"
+                >
+                  取消
+                </v-btn>
+                <v-btn
+                  color="success"
+                  class="mx-2"
+                  @click="uploadImg"
+                >
+                  确定
+                </v-btn>
+              </v-card>
+            </v-dialog>
+            
             <v-btn 
               class="mx-2" 
               color="error"
@@ -122,9 +158,21 @@
         //   'https://p1.meituan.net/travelcube/01d2ab1efac6e2b7adcfcdf57b8cb5481085686.png',
         // ],
         selected: [],
-        dialog: false
+        dialog: false,
+        newDialog: false,
+        img: ''
       }
     },
+    methods: {
+      uploadImg() {
+        console.log(this.img);
+        this.cancelUpload()
+      },
+      cancelUpload() {
+        this.img = ''
+        this.newDialog = false
+      }
+    }
   }
 </script>
 

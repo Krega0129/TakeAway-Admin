@@ -1,5 +1,11 @@
 <template>
   <div class="newShopInfo">
+    <component
+      :is="tip"
+      :alertText="alertText"
+      :alertType="alertType"
+      :showTip="show"
+    ></component>
     <v-data-table
       :headers="headers"
       :items="shopInfo"
@@ -11,10 +17,10 @@
       <template v-slot:top>
         <v-dialog v-model="passReview" max-width="500px">
           <v-card>
-            <v-card-title class="headline">确定通过审核?</v-card-title>
+            <v-card-title class="headline">确定{{flag}}通过审核?</v-card-title>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="cancelReview">取消</v-btn>
+              <v-btn color="blue darken-1" @click="cancelReview" text>取消</v-btn>
               <v-btn color="blue darken-1" text @click="confirmReview">确定</v-btn>
               <v-spacer></v-spacer>
             </v-card-actions>
@@ -27,6 +33,7 @@
         large
         color="error"
         class="mx-2"
+        @click="failReview"
       >
         审核不通过
       </v-btn>
@@ -34,6 +41,7 @@
         large
         color="success"
         class="mx-2"
+        @click="review"
       >
         审核通过
       </v-btn>
@@ -42,21 +50,45 @@
 </template>
 
 <script>
+  import tip from '../../../../components/tip';
+  import { showTip } from '../../../../utils';
+
   export default {
     name: 'newShopInfo',
     data() {
       return {
         passReview: false,
         headers: [],
-        shopInfo: []
+        shopInfo: [],
+        alertText: '',
+        alertType: 'success',
+        show: false,
+        flag: ''
+      }
+    },
+    components: {
+      tip
+    },
+    computed: {
+      tip() {
+        return 'tip'
       }
     },
     methods: {
+      review() {
+        this.flag = ''
+        this.passReview = true
+      },
+      failReview() {
+        this.flag = '不'
+        this.passReview = true
+      },
       confirmReview() {
-        console.log('审核通过');
+        this.passReview = false
+        showTip.call(this, this.flag==''?'审核通过':'审核不通过')
       },
       cancelReview() {
-        console.log('审核不通过');
+        this.passReview = false
       }
     }
   }
