@@ -36,11 +36,22 @@
 
           <v-select
             dense
-            class="mt-6"
-            :items="selectItem"
+            class="mt-6 mx-5"
+            :items="status"
             style="width: 30px"
-            label="请选择校区"
+            label="未审核"
             solo
+            v-model="selectStatusVal"
+          ></v-select>
+
+          <v-select
+            dense
+            class="mt-6"
+            :items="campus"
+            style="width: 30px"
+            label="全部校区"
+            solo
+            v-model="selectCampusVal"
           ></v-select>
 
           <v-spacer></v-spacer>
@@ -82,6 +93,15 @@
           </v-dialog>
         </v-toolbar>
       </template>
+
+      <template v-slot:[`item.shopHead`]="{ item }">
+        <v-img
+          class="my-1"
+          max-width="100"
+          max-height="100"
+          :src="BASE_URL + '/' + item.shopHead"
+        ></v-img>
+      </template>
       
       <template v-slot:[`item.actions`]="{ item }">
         <v-btn 
@@ -99,6 +119,7 @@
         </v-btn>
         <v-btn 
             small
+            v-if="statusSelectIndex == 0"
             color="success"
             class="mx-2"
             @click="review(item)">
@@ -119,11 +140,17 @@
 <script>
   import {
     reviewNewShop,
-    getShop,
-    
+    getShop
   } from '../../../../network/shop'
+  import {
+    getAllCampus
+  } from '../../../../network/work'
   import tip from '../../../../components/tip';
-  import { showTip } from '../../../../utils';
+  import { showTip, close } from '../../../../utils';
+  import { 
+    BASE_URL,
+    H_config
+  } from '../../../../network/config'
 
   export default {
     name: 'newShop',
@@ -133,7 +160,6 @@
         singleSelect: false,
         multiSelect: false,
         search: '',
-        selectItem: [ '广工', '广大' ],
         passReview: false,
         header: [
           {
@@ -141,6 +167,12 @@
             align: 'start',
             sortable: false,
             value: 'shopName',
+          },
+          {
+            text: '头像',
+            align: 'start',
+            sortable: false,
+            value: 'shopHead'
           },
           { 
             text: '审核', 
@@ -154,18 +186,47 @@
         editedIndex: -1,
         alertText: '',
         alertType: 'success',
-        show: false
+        show: false,
+        BASE_URL: BASE_URL,
+        campus: ['全部校区'],
+        status: ['未审核', '已通过', '未通过'],
+        selectCampusVal: '全部校区',
+        selectStatusVal: '未审核',
+        campusSelectIndex: 0,
+        statusSelectIndex: 0
       }
     },
     components: {
       tip,
     },
     mounted() {
-      this.initialize()
+      this._getShop()
+      getAllCampus().then(res => {
+        if(res && res.code == H_config.STATECODE_campus_SUCCESS) {
+          console.log(res);
+          let campusList = res.data
+          for(let campus of campusList) {
+            this.campus.push(campus.campusName)
+          }
+        }
+      })
     },
     watch: {
       selected (val) {
         console.log(val);
+      },
+      '$route'(val) {
+        if(val.fullPath == '/admin/newShop') {
+          this._getShop()
+        }
+      },
+      selectCampusVal(val) {
+        this.campusSelectIndex = this.campus.indexOf(val)
+        this._getShop()
+      },
+      selectStatusVal(val) {
+        this.statusSelectIndex = this.status.indexOf(val)
+        this._getShop()
       }
     },
     computed: {
@@ -181,57 +242,24 @@
           typeof value === 'string' &&
           value.toString().indexOf(search) !== -1
       },
-      initialize () {
-        this.shops = [
-          {
-            shopName: '15',
-          },
-          {
-            shopName: '14',
-          },
-          {
-            shopName: '13',
-          },
-          {
-            shopName: '12',
-          },
-          {
-            shopName: '11',
-          },
-          {
-            shopName: '10',
-          },
-          {
-            shopName: '9',
-          },
-          {
-            shopName: '8',
-          },
-          {
-            shopName: '7',
-          },
-          {
-            shopName: '6',
-          },
-          {
-            shopName: '5',
-          },
-          {
-            shopName: '4',
-          },
-          {
-            shopName: '3',
-          },
-          {
-            shopName: '2',
-          },
-          {
-            shopName: '1',
+      _getShop() {
+        getShop({
+          auditStatus: this.statusSelectIndex,
+          address: this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal
+        }).then(res => {
+          if(res && res.code == H_config.STATECODE_get_SUCCESS) {
+            this.$store.commit('updateShopList', res.data.list)
+            this.shops = res.data.list
+          } else if(res && res.code == H_config.STATECODE_getNull_FAILED) {
+            this.$store.commit('updateShopList', [])
+            this.shops = []
           }
-        ]
+        })
       },
       // 详情
       editItem (item) {
+        this.editedIndex = this.shops.indexOf(item)
+        this.$store.commit('updateCurrentShop', { shop: item, status: this.statusSelectIndex })
         this.$router.push('newShop/newShopInfo')
       },
       // 审核

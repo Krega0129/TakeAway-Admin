@@ -40,6 +40,7 @@
             :items="selectItem"
             style="width: 30px"
             label="待审核"
+            v-model="statusSelectVal"
             solo
           ></v-select>
 
@@ -166,26 +167,16 @@
         shopList: [],
         alertText: '',
         alertType: 'success',
-        show: false
+        show: false,
+        statusSelectVal: '未审核',
+        statusSelectIndex: 0
       }
     },
     components: {
       tip,
     },
     mounted() {
-      reviewDetails({
-        auditStatus: 0,
-        pageNum: 1,
-        pageSize: 100
-      }).then(res => {
-        console.log(res);
-        if(res.code == 1200) {
-          this.shopList = res.data.list
-          for(let item of this.shopList) {
-            this.desserts.push(item[0])
-          }
-        }
-      })
+      this._reviewDetails()
     },
     computed: {
       tip() {
@@ -195,6 +186,15 @@
     watch: {
       selected (val) {
         console.log(val);
+      },
+      $route(val) {
+        if(val.fullPath == '/admin/shopRenewInfo') {
+          this._reviewDetails()
+        }
+      },
+      statusSelectVal(val) {
+        this.statusSelectIndex = this.selectItem.indexOf(val)
+        this._reviewDetails()
       }
     },
     methods: {
@@ -204,6 +204,20 @@
           search != null &&
           typeof value === 'string' &&
           value.toString().indexOf(search) !== -1
+      },
+      _reviewDetails() {
+        reviewDetails({
+          auditStatus: this.statusSelectIndex
+        }).then(res => {
+          console.log(res);
+          if(res.code == 1200) {
+            this.desserts = []
+            this.shopList = res.data.list
+            for(let item of this.shopList) {
+              this.desserts.push(item[0])
+            }
+          }
+        })
       },
       // 详情
       editItem (item) {

@@ -5,8 +5,7 @@ const Admin = () => import('@/views/admin');
 const Login = () => import('@/views/login');
 
 const Money = () => import('@/views/Home/work/money');
-const Campus = () => import('@/views/Home/work/campus/campus');
-const CampusDetails = () => import('@/views/Home/work/campus/campusDetails')
+const Campus = () => import('@/views/Home/work/campus');
 const Poster = () => import('@/views/Home/work/poster');
 const SearchOrder = () => import('@/views/Home/work/searchOrder');
 const OrderDetails = () => import('@/views/Home/work/orderDetails');
@@ -45,16 +44,7 @@ const adminRoute = [
     meta: {
       title: '设置校区'
     },
-    component: Campus,
-    children: [
-      {
-        path: 'campusDetails',
-        meta: {
-          title: '校区详情'
-        },
-        component: CampusDetails
-      }
-    ]
+    component: Campus
   },
   {
     path: 'poster',

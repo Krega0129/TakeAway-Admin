@@ -59,7 +59,9 @@
     </v-app-bar>
     <v-main class="main">
       <v-container fluid>
-        <router-view></router-view>
+        <transition name="fade" mode="out-in">
+          <router-view></router-view>
+        </transition>
       </v-container>
     </v-main>
   </v-app>
@@ -187,5 +189,16 @@
   .main {
     height: 100vh;
     min-width: 600px;
+  }
+  
+  .router-link-active{
+    background-color: skyblue;
+    color: white;
+  }
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity .25s;
+  }
+  .fade-enter, .fade-leave-to {
+    opacity: 0;
   }
 </style>

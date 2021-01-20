@@ -27,7 +27,7 @@ export function reviewDetails(data) {
   })
 }
 
-// 修改审核状态
+// 新店注册
 export function reviewNewShop(data) {
   return axios({
     method: 'post',

@@ -13,8 +13,7 @@ export function addCampus(data) {
 // 获取所有校区
 export function getAllCampus(data) {
   return axios({
-    url: H_config.API_getAllCampus_URL, 
-    data: data
+    url: H_config.API_getAllCampus_URL
   })
 }
 
@@ -23,6 +22,57 @@ export function updateCampusInfo(data) {
   return axios({
     method: 'put',
     url: H_config.API_updateCampusInfo_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+// 删除校区
+export function deleteCampus(data) {
+  return axios({
+    method: 'delete',
+    url: H_config.API_deleteCampus_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+// 多图片上传
+export function updatePhoto(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_updatePhoto_URL, 
+    data: data,
+  })
+}
+
+// 多图片上传
+export function updatePhotos(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_updatePhotos_URL, 
+    data: data,
+  })
+}
+
+// 查询轮播图
+export function selectPhotos(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_selectPhotos_URL, 
+    data: data,
+  })
+}
+
+// 删除图片
+export function deletePhoto(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_deletePhoto_URL, 
     data: data,
   })
 }

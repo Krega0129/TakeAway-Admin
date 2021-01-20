@@ -135,6 +135,13 @@
 </template>
 
 <script>
+  import { showTip, close } from '../../../utils'
+  import {
+    updatePhoto,
+    updatePhotos
+  } from '../../../network/work'
+  import { BASE_URL, H_config } from '../../../network/config'
+
   export default {
     name: 'poster',
     data () {
@@ -160,7 +167,8 @@
         selected: [],
         dialog: false,
         newDialog: false,
-        img: ''
+        img: '',
+        BASE_URL: BASE_URL
       }
     },
     methods: {

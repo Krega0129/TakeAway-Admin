@@ -1,5 +1,13 @@
 <template>
   <div class="campus">
+
+    <component
+      :is="tip"
+      :alertText="alertText"
+      :alertType="alertType"
+      :showTip="show"
+    ></component>
+
     <v-data-table
       :headers="headers"
       :items="campus"
@@ -52,7 +60,7 @@
                       label="校区名"
                     ></v-text-field>
                     <v-text-field
-                      v-model="editedItem.deliverFee"
+                      v-model="editedItem.campusCost"
                       label="配送费"
                     ></v-text-field>
                 </v-container>
@@ -108,19 +116,6 @@
         </v-btn>
         <v-btn 
           small
-          dark
-          class="mx-2"
-          @click="campusDetails(item)">
-        <v-icon
-          small
-          class="mr-2"
-        >
-          mdi-menu
-        </v-icon>
-          校区详情
-        </v-btn>
-        <v-btn 
-          small
           color="error"
           class="mx-2"
           @click="deCampus(item)">
@@ -139,6 +134,17 @@
 </template>
 
 <script>
+  import {
+    getAllCampus,
+    updateCampusInfo,
+    deleteCampus
+  } from '../../../network/work'
+  import {
+    H_config
+  } from '../../../network/config'
+  import tip from '../../../components/tip';
+  import { showTip, close } from '../../../utils'
+
   export default {
     name: 'campus',
     data() {
@@ -154,7 +160,7 @@
             text: '配送费',
             align: 'start',
             sortable: true,
-            value: 'deliverFee'
+            value: 'campusCost'
           },
           {
             text: '商家数量',
@@ -170,18 +176,7 @@
             width: 400
           }
         ],
-        campus: [
-          {
-            campusName: '广东工业大学',
-            deliverFee: 1,
-            shopNum: 10
-          },
-          {
-            campusName: '广州大学',
-            deliverFee: 2,
-            shopNum: 20
-          }
-        ],
+        campus: [],
         selected: [],
         singleSelect: false,
         deleteCampus: false,
@@ -194,8 +189,16 @@
           deliverFee: 0,
           shopNum: 0
         },
-
+        show: false,
+        alertText: '',
+        alertType: 'success'
       }
+    },
+    components: {
+      tip
+    },
+    mounted() {
+      this._getAllCampus()
     },
     methods: {
       filterOnlyCapsText(value, search, item) {
@@ -204,17 +207,28 @@
           typeof value === 'string' &&
           value.toString().indexOf(search) !== -1;
       },
+      _getAllCampus() {
+        getAllCampus().then(res => {
+          console.log(res);
+          if(res.code == H_config.STATECODE_campus_SUCCESS) {
+            this.campus = []
+            let campusList = res.data
+            for(let campus of campusList) {
+              this.campus.push(campus)
+            }
+          }
+        })
+      },
       editCampus(item) {
+        console.log(item);
         this.editedIndex = this.campus.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
-      campusDetails(item) {
-        this.editedIndex = this.campus.indexOf(item)
-        this.$router.push('campus/campusDetails')
-      },
       deCampus(item) {
+        console.log(item);
         this.editedIndex = this.campus.indexOf(item)
+        console.log(this.editedIndex);
         this.deleteCampus = true
       },
       cancelDelete() {
@@ -222,7 +236,14 @@
         this.deleteCampus = false
       },
       confirmDelete() {
-        this.campus.splice(this.editedIndex, 1)
+        deleteCampus({
+          campusId: this.campus[this.editedIndex].campusId
+        }).then(res => {
+          if(res.code == H_config.STATECODE_campus_SUCCESS) {
+            // this.campus.splice(this.editedIndex, 1)
+            showTip.call(this, '删除成功')
+          }
+        })
         this.editedIndex = -1;
         this.deleteCampus = false
       },
@@ -238,8 +259,15 @@
         })
       },
       save () {
+        Object.assign(this.campus[this.editedIndex], this.editedItem)
         if (this.editedIndex > -1) {
-          Object.assign(this.campus[this.editedIndex], this.editedItem)
+          updateCampusInfo(JSON.stringify(this.editedItem)).then(res => {
+            if(res.code == H_config.STATECODE_campus_SUCCESS) {
+              showTip.call(this, '修改成功')
+            } else {
+              showTip.call(this, '修改失败', 'error')
+            }
+          })
         } else {
           this.campus.push(this.editedItem)
         }
@@ -249,6 +277,9 @@
     computed: {
       formTitle () {
         return this.editedIndex === -1 ? '新增校区' : '编辑校区'
+      },
+      tip() {
+        return 'tip'
       }
     },
     watch: {

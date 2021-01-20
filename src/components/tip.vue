@@ -27,16 +27,10 @@ export default {
       default: true
     },
   },
-  created() {
-    // this.showAlert()
-  },
   watch: {
     showTip(val) {
       if(val) {
-        console.log(111);
         this.showAlert()
-      }else {
-        console.log(222);
       }
     }
   },

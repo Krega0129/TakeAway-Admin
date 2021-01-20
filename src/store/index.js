@@ -6,29 +6,28 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    count: 1,
     shopList: [],
     currentShop: {},
     currentShopIndex: -1,
+    shopReviewStatus: 0,
     shopOldInfo: {},
     shopNewInfo: {}
   },
   mutations: {
-    increment(state) {
-      state.count++
-    },
     changeShopInfo(state, payload){
       state.shopOldInfo = payload.shopOldInfo
       state.shopNewInfo = payload.shopNewInfo
-      // state.currentShopIndex = payload.currentShopIndex
+    },
+    updateShopList(state, payload) {
+      state.shopList = payload
+    },
+    updateCurrentShop(state, payload) {
+      state.currentShop = payload.shop
+      state.shopReviewStatus = payload.status
     }
   },
   actions: {
-    increment({ commit }) {
-      setInterval(() => {
-        commit('increment')
-      }, 1000);
-    }
+    
   },
   modules: {
   },

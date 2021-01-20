@@ -32,7 +32,7 @@
         </v-toolbar>
       </template>
     </v-data-table>
-    <div class="text-center mt-4">
+    <div class="text-center mt-4" v-if="$store.state.shopReviewStatus == 0">
       <v-btn
         large
         color="error"
@@ -49,6 +49,12 @@
       >
         审核通过
       </v-btn>
+    </div>
+    <div class="text-center mt-4 green--text" v-if="$store.state.shopReviewStatus == 1">
+      审核已通过
+    </div>
+    <div class="text-center mt-4 red--text" v-if="$store.state.shopReviewStatus == 2">
+      审核未通过
     </div>
   </div>
 </template>
@@ -135,9 +141,7 @@
           ids: this.updateId
         }).then(res => {
           showTip.call(this, '审核已通过')
-          setTimeout(() => {
-            this.$router.go(-1)
-          }, 1000)
+          close.call(this)
         })
       },
       cancelReview() {
@@ -146,9 +150,7 @@
           ids: this.updateId
         }).then(res => {
           showTip.call(this, '审核不通过', 'error')
-          setTimeout(() => {
-            this.$router.go(-1)
-          }, 1000)
+          close.call(this)
         })
       }
     }
