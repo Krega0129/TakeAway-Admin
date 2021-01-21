@@ -29,9 +29,10 @@
           <v-select
             dense
             class="mt-6"
-            :items="selectItem"
+            :items="campus"
             style="width: 30px"
-            label="请选择校区"
+            label="全部校区"
+            v-model="campusSelectVal"
             solo
           ></v-select>
 
@@ -61,13 +62,13 @@
             解封店铺
           </v-btn>
 
-          <v-dialog v-model="deleteShop" max-width="500px">
+          <v-dialog v-model="banShop" max-width="500px">
             <v-card>
-              <v-card-title class="headline">确定通过审核?</v-card-title>
+              <v-card-title class="headline">确定{{isBan ? '解封': '封停'}}该店铺?</v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="cancelDelete">取消</v-btn>
-                <v-btn color="blue darken-1" text @click="confirmDelete">确定</v-btn>
+                <v-btn color="blue darken-1" text @click="cancelBan">取消</v-btn>
+                <v-btn color="blue darken-1" text @click="confirmBan">确定</v-btn>
                 <v-spacer></v-spacer>
               </v-card-actions>
             </v-card>
@@ -89,6 +90,34 @@
         </v-icon>
         详情
         </v-btn>
+        <v-btn 
+          small
+          color="error"
+          class="mx-2"
+          @click="changeUpdate(item)"
+          v-if="item.runStatus != 2">
+        <v-icon
+          small
+          class="mr-2"
+        >
+          mdi-menu
+        </v-icon>
+        封停店铺
+        </v-btn>
+        <v-btn 
+          small
+          color="success"
+          class="mx-2"
+          @click="changeUpdate(item)"
+          v-else>
+        <v-icon
+          small
+          class="mr-2"
+        >
+          mdi-menu
+        </v-icon>
+        解封店铺
+        </v-btn>
       </template>
     </v-data-table>
     <router-view v-else></router-view>
@@ -96,6 +125,16 @@
 </template>
 
 <script>
+  import {
+    getAllCampus
+  } from '../../../../network/work';
+  import {
+    getShop,
+    updateAllRunStatus
+  } from '../../../../network/shop';
+  import { H_config } from '../../../../network/config';
+  import { showTip, close } from '../../../../utils';
+
   export default {
     name: 'shopList',
     data() {
@@ -116,28 +155,39 @@
           {
             text: '详情', 
             value: 'actions', 
-            width: 200,
+            width: 300,
             align: 'center',
             sortable: false 
           }
         ],
-        shop: [
-          {
-            shopName: '广工三饭',
-            shopStatus: '营业中'
-          },
-          {
-            shopName: '广工四饭',
-            shopStatus: '休息中'
-          }
-        ],
+        shop: [],
         search: '',
-        deleteShop: false,
+        banShop: false,
         editIndex: -1,
         multiSelect: false,
         singleSelect: false,
         selected: [],
-        selectItem: ['广工', '广大']
+        campus: ['全部校区'],
+        campusSelectVal: '',
+        campusSelectIndex: 0,
+        isBan: false
+      }
+    },
+    mounted() {
+      getAllCampus().then(res => {
+        if(res.code == H_config.STATECODE_campus_SUCCESS) {
+          for(let school of res.data) {
+            this.campus.push(school.campusName)
+          }
+        }
+      })
+
+      this._getShop()
+    },
+    watch: {
+      campusSelectVal(val) {
+        // this.campusSelectIndex = this.campus.indexOf(val)
+        this._getShop()
       }
     },
     methods: {
@@ -147,22 +197,46 @@
           typeof value === 'string' &&
           value.toString().indexOf(search) !== -1;
       },
+      _getShop() {
+        getShop({
+          address: this.campusSelectVal == '全部校区' ? '' : this.campusSelectVal
+        }).then(res => {
+          if(res.code == H_config.STATECODE_get_SUCCESS) {
+            this.shop = res.data
+          } else if(res.code == H_config.STATECODE_getNull_FAILED) {
+            this.shop = []
+          }
+        })
+      },
       shopDetails(item) {
         this.editIndex = this.shop.indexOf(item)
+        this.$store.commit('changeShopId', item.shopId)
         this.$router.push('shopList/shopInfo')
       },
-      deShop(item) {
+      changeUpdate(item) {
         this.editIndex = this.shop.indexOf(item)
-        this.deleteShop = true
+        this.isBan = item.runStatus == 2
+        this.banShop = true
       },
-      cancelDelete() {
+      cancelBan() {
         this.editIndex = -1;
-        this.deleteShop = false
+        this.banShop = false
       },
-      confirmDelete() {
-        this.campus.slice(this.editIndex, 1)
+      async confirmBan() {
+        await updateAllRunStatus({
+          runStatus: this.isBan ? 1 : 2,
+          shopIds: this.shop[this.editIndex].shopId
+        }).then(res => {
+          console.log(res);
+          if(res.code == H_config.STATECODE_update_SUCCESS) {
+            this.shop[this.editIndex].runStatus = this.isBan ? 1 : 2
+            showTip.call(this, this.isBan ? '解封成功' : '封停成功')
+          } else {
+            showTip.call(this, this.isBan ? '解封失败' : '封停失败', 'error')
+          }
+        })
         this.editIndex = -1;
-        this.deleteShop = false
+        this.banShop = false
       },
       closeShop() {
         console.log('批量关店');

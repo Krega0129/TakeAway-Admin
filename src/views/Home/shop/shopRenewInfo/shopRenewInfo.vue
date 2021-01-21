@@ -120,10 +120,12 @@
 <script>
   import { 
     reviewDetails,
+    auditShopUpdate
   } from '../../../../network/shop'
 
   import tip from '../../../../components/tip';
   import { showTip } from '../../../../utils';
+import { H_config } from '../../../../network/config';
 
   export default {
     data () {
@@ -212,7 +214,7 @@
           console.log(res);
           if(res.code == 1200) {
             this.desserts = []
-            this.shopList = res.data.list
+            this.shopList = res.data
             for(let item of this.shopList) {
               this.desserts.push(item[0])
             }
@@ -235,15 +237,24 @@
         this.passReview = true
       },
       // 确定
-      confirmReview () {
-        this.desserts.splice(this.editedIndex, 1)
+      async confirmReview () {
+        await auditShopUpdate({
+          auditStatus: 1,
+          ids: this.desserts[this.editedIndex].updateId
+        }).then(res => {
+          if(res.code == H_config.STATECODE_review_SUCCESS) {
+            this.desserts.splice(this.editedIndex, 1)
+            showTip.call(this, '审核通过')
+          } else {
+            showTip.call(this, '审核失败', 'error')
+          }
+        })
         this.passReview = false
-        showTip.call(this, '审核通过')
       },
       // 取消
       cancelReview () {
         this.passReview = false
-        showTip.call(this, '审核已取消', 'error')
+        showTip.call(this, '审核已取消')
       },
       // 多选通过
       reviewMultiPass() {

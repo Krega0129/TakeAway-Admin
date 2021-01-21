@@ -25,6 +25,9 @@ H_config.STATECODE_updatePhoto_FAILED = 1518        // 文件上传失败
 H_config.API_selectPhotos_URL = '/managerInfo/selectPhotos'
 H_config.API_deletePhoto_URL = '/managerInfo/deletePhoto'
 H_config.STATECODE_selectPhotos_NULL_FAILED = 1500   // 参数为空（删除图片适用）
+// 根据订单编号查询订单
+H_config.API_getOrderById_URL = '/order/selectAllOrderInfo'
+// H_config.STATECODE_campus_SUCCESS = 
 
 // 店铺
 H_config.STATECODE_get_SUCCESS = 1200 // 查询成功
@@ -33,6 +36,7 @@ H_config.STATECODE_update_SUCCESS = 1202  // 修改成功
 H_config.STATECODE_getShopInfo_FAILED = 1503    // 店铺信息结果为空（除店铺商品）
 // 审核店铺修改信息
 H_config.API_auditShopUpdate_URL = '/managerInfo/auditShopUpdate'
+H_config.STATECODE_review_SUCCESS = 1207
 // 获取店铺修改详情
 H_config.API_statusGetShopUpdate_URL = '/managerInfo/statusGetShopUpdate'
 // 审核新店
@@ -49,6 +53,7 @@ H_config.API_shopIdGetShopLicense_URL = '/managerInfo/selectShopLicense'
 H_config.API_updateAllRunStatus_URL = '/managerInfo/updateAllRunStatus'
 // 修改店铺置顶
 H_config.API_updateTopStatus_URL = '/managerInfo/updateTopStatus'
+
 
 // 骑手
 H_config.STATECODE_rider_SUCCESS = 3200
@@ -69,6 +74,8 @@ H_config.STATECODE_getShareSchoolByStatus_SUCCESSSTATUS = 2218
 H_config.API_updateShareSchoolStatus_URL = '/shareschool/updateStatus'
 H_config.STATECODE_updateShareSchoolStatus_SUCCESSSTATUS = 2220
 
+
+H_config.API_test_URL = '/modifyCommodity/updateHead'
 
 export {
   BASE_URL,

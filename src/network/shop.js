@@ -66,7 +66,7 @@ export function shopIdGetCommodity(data) {
 export function shopIdGetShop(data) {
   return axios({
     method: 'post',
-    url: H_config.shopIdGetShop, 
+    url: H_config.API_shopIdGetShop_URL, 
     data: data,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -92,7 +92,7 @@ export function shopIdGetShopLicense(data) {
 export function updateAllRunStatus(data) {
   return axios({
     method: 'post',
-    url: H_config.updateAllRunStatus, 
+    url: H_config.API_updateAllRunStatus_URL, 
     data: data,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -105,7 +105,7 @@ export function updateAllRunStatus(data) {
 export function updateTopStatus(data) {
   return axios({
     method: 'post',
-    url: H_config.updateTopStatus, 
+    url: H_config.API_updateTopStatus_URL, 
     data: data,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

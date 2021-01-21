@@ -6,7 +6,10 @@ export function addCampus(data) {
   return axios({
     method: 'post',
     url: H_config.API_addCampus_URL, 
-    data: data
+    data: data,
+    headers: {
+      'Content-Type': 'application/json'
+    }
   })
 }
 
@@ -47,6 +50,9 @@ export function updatePhoto(data) {
     method: 'post',
     url: H_config.API_updatePhoto_URL, 
     data: data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
   })
 }
 
@@ -56,6 +62,9 @@ export function updatePhotos(data) {
     method: 'post',
     url: H_config.API_updatePhotos_URL, 
     data: data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
   })
 }
 
@@ -74,5 +83,17 @@ export function deletePhoto(data) {
     method: 'post',
     url: H_config.API_deletePhoto_URL, 
     data: data,
+  })
+}
+
+// 删除图片
+export function test(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_test_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
   })
 }

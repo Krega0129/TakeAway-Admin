@@ -10,6 +10,7 @@ export default new Vuex.Store({
     currentShop: {},
     currentShopIndex: -1,
     shopReviewStatus: 0,
+    shopId: -1,
     shopOldInfo: {},
     shopNewInfo: {}
   },
@@ -24,6 +25,9 @@ export default new Vuex.Store({
     updateCurrentShop(state, payload) {
       state.currentShop = payload.shop
       state.shopReviewStatus = payload.status
+    },
+    changeShopId(state, payload) {
+      state.shopId = payload
     }
   },
   actions: {

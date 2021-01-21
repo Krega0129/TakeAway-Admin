@@ -6,6 +6,15 @@
     >
       <div></div>
       <v-spacer></v-spacer>
+      <v-select
+        dense
+        class="mt-6 mx-5"
+        :items="campus"
+        style="width: 10px"
+        label="请选择校区"
+        v-model="campusSelectVal"
+        solo
+      ></v-select>
       <v-dialog
         max-width="1000px"
         v-model="dialog"
@@ -30,14 +39,14 @@
             >
               <v-row>
                 <v-col
-                  v-for="item in imgUrl"
-                  :key="item.id"
+                  v-for="item in posterURL"
+                  :key="item.photoId"
                   cols="12"
                   md="4"
                 >
                   <v-item v-slot="{ active, toggle }">
                     <v-img
-                      :src="item.url"
+                      :src="BASE_URL + '/' + item.photo"
                       height="150"
                       class="text-right pa-2"
                       @click="toggle"
@@ -61,6 +70,7 @@
             flat
           >
             <v-spacer></v-spacer>
+
             <v-dialog
               max-width="500px"
               v-model="newDialog"
@@ -78,11 +88,12 @@
               <v-card
                 class="mx-auto pa-3 text-right"
               >
-                <v-file-input
-                  accept="image/*"
-                  label="上传图片"
-                  v-model="img"
-                ></v-file-input>
+                  <v-file-input
+                    accept="image/*"
+                    label="上传图片"
+                    v-model="img"
+                  ></v-file-input>
+
                 <v-spacer></v-spacer>
                 <v-btn
                   color="error"
@@ -117,20 +128,23 @@
       class="mx-auto mt-3"
       cycle
       style="width: 70vw"
+      v-if="posterURL[0]"
       hide-delimiter-background
       show-arrows-on-hover
     >
       <v-carousel-item
-        v-for="item in imgUrl"
-        :key="item.id"
+        v-for="item in posterURL"
+        :key="item.photoId"
       >
         <v-img
           :aspect-ratio="16/9"
           style="height: 100%"
-          :src="item.url"
+          :src="BASE_URL + '/' + item.photo"
         ></v-img>
       </v-carousel-item>
     </v-carousel>
+
+    <div v-else class="text-center red--text mt-16">该校区还没设置海报</div>
   </div>  
 </template>
 
@@ -138,7 +152,10 @@
   import { showTip, close } from '../../../utils'
   import {
     updatePhoto,
-    updatePhotos
+    updatePhotos,
+    getAllCampus,
+    selectPhotos,
+    test
   } from '../../../network/work'
   import { BASE_URL, H_config } from '../../../network/config'
 
@@ -146,38 +163,72 @@
     name: 'poster',
     data () {
       return {
-        imgUrl: [
-          {
-            url: 'http://p1.meituan.net/codeman/826a5ed09dab49af658c34624d75491861404.jpg',
-            id: 1
-          },
-          {
-            url: 'https://p1.meituan.net/travelcube/01d2ab1efac6e2b7adcfcdf57b8cb5481085686.png',
-            id: 2
-          },
-          {
-            url: 'http://p0.meituan.net/codeman/a97baf515235f4c5a2b1323a741e577185048.jpg',
-            id: 3
-          }
+        posterURL: [
+          // {
+          //   photo: 'http://p1.meituan.net/codeman/826a5ed09dab49af658c34624d75491861404.jpg',
+          //   photoId: 1
+          // },
+          // {
+          //   photo: 'https://p1.meituan.net/travelcube/01d2ab1efac6e2b7adcfcdf57b8cb5481085686.png',
+          //   photoId: 2
+          // },
+          // {
+          //   photo: 'http://p0.meituan.net/codeman/a97baf515235f4c5a2b1323a741e577185048.jpg',
+          //   photoId: 3
+          // }
         ],
-        // imgUrl: [
-        //   'http://p1.meituan.net/codeman/826a5ed09dab49af658c34624d75491861404.jpg',
-        //   'https://p1.meituan.net/travelcube/01d2ab1efac6e2b7adcfcdf57b8cb5481085686.png',
-        // ],
         selected: [],
         dialog: false,
         newDialog: false,
-        img: '',
-        BASE_URL: BASE_URL
+        img: null,
+        BASE_URL: BASE_URL,
+        campus: [],
+        campusList: [],
+        campusSelectVal: '请选择校区',
+        campusSelectIndex: 0,
+      }
+    },
+    async mounted() {
+      await getAllCampus().then(res => {
+        if(res.code == H_config.STATECODE_campus_SUCCESS) {
+          this.campusList = res.data
+          this.campusSelectVal = this.campusList[0].campusName || ''
+          this.campus = []
+          for(let school of this.campusList) {
+            this.campus.push(school.campusName)
+          }
+        }
+      })
+    },
+    watch: {
+      campusSelectVal(val) {
+        this.campusSelectIndex = this.campus.indexOf(val)
+        this._getAllPosters()
       }
     },
     methods: {
+      _getAllPosters() {
+        selectPhotos({
+          campusId: this.campusList[this.campusSelectIndex].campusId
+        }).then(res => {
+          if(res.code == H_config.STATECODE_get_SUCCESS) {
+            this.posterURL = res.data
+          } else if(res.code == H_config.STATECODE_getNull_FAILED) {
+            this.posterURL = []
+          }
+        })
+      },
       uploadImg() {
-        console.log(this.img);
-        this.cancelUpload()
+        let formData = new FormData()
+        formData.append('file', this.img)
+        formData.append('name', '2')
+
+        test(formData).then(res => {
+          console.log(res);
+        })
       },
       cancelUpload() {
-        this.img = ''
+        this.img = null
         this.newDialog = false
       }
     }

@@ -248,8 +248,8 @@
           address: this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal
         }).then(res => {
           if(res && res.code == H_config.STATECODE_get_SUCCESS) {
-            this.$store.commit('updateShopList', res.data.list)
-            this.shops = res.data.list
+            this.$store.commit('updateShopList', res.data)
+            this.shops = res.data
           } else if(res && res.code == H_config.STATECODE_getNull_FAILED) {
             this.$store.commit('updateShopList', [])
             this.shops = []
@@ -269,13 +269,18 @@
       },
       // 确定
       confirmReview () {
-        this.shops.splice(this.editedIndex, 1)
         this.passReview = false
         reviewNewShop({
           auditStatus: 1,
-          
+          shopIds: this.shops[this.editedIndex].shopId
+        }).then(res => {
+          if(res.code == H_config.STATECODE_update_SUCCESS) {
+            this.shops.splice(this.editedIndex, 1)
+            showTip.call(this, '审核已通过')
+          } else {
+            showTip.call(this, '审核失败', 'error')
+          }
         })
-        showTip.call(this, '审核已通过')
       },
       // 取消
       cancelReview () {

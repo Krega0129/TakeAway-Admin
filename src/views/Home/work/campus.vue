@@ -61,6 +61,7 @@
                     ></v-text-field>
                     <v-text-field
                       v-model="editedItem.campusCost"
+                      :rules="rules"
                       label="配送费"
                     ></v-text-field>
                 </v-container>
@@ -137,7 +138,8 @@
   import {
     getAllCampus,
     updateCampusInfo,
-    deleteCampus
+    deleteCampus,
+    addCampus
   } from '../../../network/work'
   import {
     H_config
@@ -176,6 +178,10 @@
             width: 400
           }
         ],
+        rules: [
+          v => !!v || '配送费不能为空',
+          v => /^[0-9]+([.]\d{1,2})?$/.test(v) || '最多包含两位小数'
+        ],
         campus: [],
         selected: [],
         singleSelect: false,
@@ -186,8 +192,8 @@
         editedIndex: -1,
         editedItem: {
           campusName: '',
-          deliverFee: 0,
-          shopNum: 0
+          campusCost: 0,
+          campusStatus: 1
         },
         show: false,
         alertText: '',
@@ -209,8 +215,8 @@
       },
       _getAllCampus() {
         getAllCampus().then(res => {
-          console.log(res);
           if(res.code == H_config.STATECODE_campus_SUCCESS) {
+            console.log(res);
             this.campus = []
             let campusList = res.data
             for(let campus of campusList) {
@@ -220,56 +226,62 @@
         })
       },
       editCampus(item) {
-        console.log(item);
-        this.editedIndex = this.campus.indexOf(item)
+        this.editedIndex = this.campus.indexOf(item),
+        this.editedItem.campusCost = Number(item.campusCost).toFixed(2)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
       deCampus(item) {
-        console.log(item);
         this.editedIndex = this.campus.indexOf(item)
-        console.log(this.editedIndex);
         this.deleteCampus = true
       },
       cancelDelete() {
         this.editedIndex = -1;
         this.deleteCampus = false
       },
-      confirmDelete() {
-        deleteCampus({
+      async confirmDelete() {
+        await deleteCampus({
           campusId: this.campus[this.editedIndex].campusId
         }).then(res => {
           if(res.code == H_config.STATECODE_campus_SUCCESS) {
-            // this.campus.splice(this.editedIndex, 1)
+            this.campus.splice(this.editedIndex, 1)
             showTip.call(this, '删除成功')
+          } else {
+            showTip.call(this, '删除失败', 'error')
           }
         })
         this.editedIndex = -1;
         this.deleteCampus = false
       },
-      addCampus() {
-        console.log('新增校区');
-      },
       close() {
         this.dialog = false
         this.$nextTick(() => {
           this.editedItem.campusName = ''
-          this.editedItem.deliverFee = 0
+          this.editedItem.campusCost = 0
           this.editedIndex = -1
         })
       },
-      save () {
-        Object.assign(this.campus[this.editedIndex], this.editedItem)
+      async save () {
         if (this.editedIndex > -1) {
-          updateCampusInfo(JSON.stringify(this.editedItem)).then(res => {
+          await updateCampusInfo(JSON.stringify(this.editedItem)).then(res => {
             if(res.code == H_config.STATECODE_campus_SUCCESS) {
+              Object.assign(this.campus[this.editedIndex], this.editedItem)
               showTip.call(this, '修改成功')
             } else {
               showTip.call(this, '修改失败', 'error')
             }
           })
         } else {
-          this.campus.push(this.editedItem)
+          await addCampus(JSON.stringify(this.editedItem)).then(res => {
+            if(res.code == H_config.STATECODE_campus_SUCCESS) {
+              this.campus.push(this.editedItem)
+              showTip.call(this, '新增成功')
+              // 需要重新获取 得到 campusId 才能进行删除操作
+              this._getAllCampus()
+            } else {
+              showTip.call(this, '新增失败', 'error')
+            }
+          })
         }
         this.close()
       },
