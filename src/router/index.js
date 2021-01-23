@@ -20,7 +20,7 @@ const ShopList = () => import('@/views/Home/shop/shopInfo/shopList')
 const RiderVerify = () => import('@/views/Home/rider/riderVerify/riderVerify');
 const RiderDetails = () => import('@/views/Home/rider/riderVerify/riderDetails');
 const RiderManage = () => import('@/views/Home/rider/riderManage/riderManage')
-const BanAccount = () => import('@/views/Home/rider/riderManage/banAccount');
+const RiderInfo = () => import('@/views/Home/rider/riderManage/riderInfo');
 
 const User = () => import('@/views/Home/user/user');
 const ReviewUser = () => import('@/views/Home/user/reviewUser')
@@ -141,11 +141,11 @@ const adminRoute = [
     component: RiderManage,
     children: [
       {
-        path: 'banAccount',
+        path: 'riderInfo',
         meta: {
           title: '账号管理'
         },
-        component: BanAccount
+        component: RiderInfo
       }
     ]
   },

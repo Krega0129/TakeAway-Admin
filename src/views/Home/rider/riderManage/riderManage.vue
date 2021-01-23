@@ -1,5 +1,13 @@
 <template>
   <div class="riderManage">
+
+    <component
+      :is="tip"
+      :alertText="alertText"
+      :alertType="alertType"
+      :showTip="show"
+    ></component>
+
     <v-data-table
       :headers="headers"
       :items="riders"
@@ -25,15 +33,42 @@
 
           <v-select
             dense
-            class="mt-6"
-            :items="selectItem"
+            class="mt-6 mr-5"
+            :items="campus"
             style="width: 30px"
-            label="请选择校区"
+            label="全部校区"
+            v-model="selectCampusVal"
+            solo
+          ></v-select>
+
+          <v-select
+            dense
+            class="mt-6"
+            :items="status"
+            style="width: 30px"
+            label="全部"
+            v-model="selectStatusVal"
             solo
           ></v-select>
 
           <v-spacer></v-spacer>
+
+          <v-dialog v-model="dialog" max-width="500px">
+            <v-card>
+              <v-card-title class="headline">确定{{`riders[editIndex].driverStatus` == 3 ? '解封' : '封停'}}该骑手?</v-card-title>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="closeDialog">取消</v-btn>
+                <v-btn color="blue darken-1" text @click="updateBanStatus">确定</v-btn>
+                <v-spacer></v-spacer>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-toolbar>
+      </template>
+
+      <template v-slot:[`item.driverStatus`]="{ item }">
+        {{item.driverStatus == 3 ? '已封停' : '正常'}}
       </template>
       
       <template v-slot:[`item.actions`]="{ item }">
@@ -50,6 +85,20 @@
         </v-icon>
         详情
         </v-btn>
+
+        <v-btn 
+          small
+          :color="item.driverStatus == 3 ? 'success' : 'error'"
+          class="mx-2"
+          @click="openDialog(item)">
+        <v-icon
+          small
+          class="mr-2"
+        >
+          mdi-{{item.driverStatus == 3 ? 'check' : 'block-helper'}}
+        </v-icon>
+          {{item.driverStatus == 3 ? '解封骑手' : '封停骑手'}}
+        </v-btn>
       </template>
     </v-data-table>
     <router-view v-else></router-view>
@@ -57,6 +106,18 @@
 </template>
 
 <script>
+  import {
+    getAllRider,
+    updateReviewStatus,
+    getRiderByStatus
+  } from '../../../../network/rider';
+  import {
+    getAllCampus
+  } from '../../../../network/work';
+  import { H_config} from '../../../../network/config';
+  import tip from '../../../../components/tip';
+  import { showTip } from '../../../../utils'
+
 export default {
   name: 'riderManage',
   data() {
@@ -66,39 +127,77 @@ export default {
           text: '姓名',
           align: 'start',
           sortable: false,
-          value: 'riderName'
+          value: 'driverName'
         },
         {
           text: '电话号码',
           align: 'center',
           sortable: false,
-          value: 'riderTel'
+          value: 'driverPhone'
+        },
+        {
+          text: '校区',
+          align: 'center',
+          sortable: false,
+          value: 'campusName'
+        },
+        {
+          text: '状态',
+          align: 'center',
+          sortable: false,
+          value: 'driverStatus'
         },
         {
           text: '详情',
           align: 'center',
           sortable: false,
           value: 'actions',
-          width: 200
+          width: 300
         }
       ],
-      riders: [
-        {
-          riderName: '啊强',
-          riderTel: '1111111111111'
-        },
-        {
-          riderName: '啊龙',
-          riderTel: '1111111111111'
-        },
-        {
-          riderName: '啊锴',
-          riderTel: '1111111111111'
-        }
-      ],
+      riders: [],
+      dialog: false,
       search: '',
       editIndex: -1,
-      selectItem: ['广工', '广大']
+      campus: ['全部校区'],
+      selectCampusVal: '全部校区',
+      status: ['全部', '正常', '已封停'],
+      selectStatusVal: '全部',
+      show: false,
+      alertText: '',
+      alertType: 'success',
+    }
+  },
+  components: {
+    tip
+  },
+  async mounted() {
+    await getAllCampus().then(res => {
+      if(res.code == H_config.STATECODE_campus_SUCCESS) {
+        for(let school of res.data) {
+          this.campus.push(school.campusName)
+        }
+      }
+    })
+    this._getAllRiders()
+  },
+  computed: {
+    tip() {
+      return 'tip'
+    }
+  },
+  watch: {
+    '$route'(to, from) {
+      if(to.fullPath == '/admin/riderManage' && from.fullPath == '/admin/riderManage/riderInfo' && this.riderStatus != this.$store.state.riderStatus) {
+        this.riders[this.editIndex].driverStatus = this.$store.state.riderStatus
+      }
+      
+    },
+    selectCampusVal() {
+      this._getAllRiders()
+    },
+    selectStatusVal() {
+      this._getAllRiders()
     }
   },
   methods: {
@@ -108,10 +207,47 @@ export default {
         typeof value === 'string' &&
         value.toString().indexOf(search) !== -1;
     },
+    openDialog(item) {
+      this.editIndex = this.riders.indexOf(item)
+      this.dialog = true
+    },
+    closeDialog() {
+      this.editIndex = -1
+      this.dialog = false
+    },
+    _getAllRiders() {
+      getRiderByStatus({
+        campusName: this.selectCampusVal == '全部校区' ? '' : this.selectCampusVal,
+        driverStatus: this.selectStatusVal == '全部' ? '' : this.selectStatusVal == '正常' ? 1 : 3
+      }).then(res => {
+        if(res.code == H_config.STATECODE_rider_SUCCESS) {
+          this.riders = res.data
+        }
+      })
+    },
     riderDetails(item) {
       this.editIndex = this.riders.indexOf(item)
-      this.$router.push('riderManage/banAccount')
+      this.$store.commit('updateRiderId', item.driverId)
+      this.$store.commit('updateRiderStatus', this.riderStatus)
+      this.$router.push('riderManage/riderInfo')
     },
+    updateBanStatus() {
+      updateReviewStatus({
+        driverId: this.riders[this.editIndex].driverId,
+        driverStatus: this.riders[this.editIndex].driverStatus == 3 ? 1 : 3
+      }).then(res => {
+        if(res.code == H_config.STATECODE_rider_SUCCESS) {
+          this.riders[this.editIndex].driverStatus = this.riders[this.editIndex].driverStatus == 3 ? 1 : 3
+          if(this.selectStatusVal !== '全部') {
+            this.riders.splice(this.editIndex, 1)
+          }
+          this.closeDialog()
+          showTip.call(this, '修改成功')
+        } else {
+          showTip.call(this, '修改失败', 'error')
+        }
+      })
+    }
   }
 }
 </script>

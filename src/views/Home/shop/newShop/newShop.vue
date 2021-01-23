@@ -16,7 +16,7 @@
       no-data-text="没有数据"
       :custom-filter="filterOnlyCapsText"
       :show-select="multiSelect"
-      item-key="shopName"
+      item-key="shopId"
       :items-per-page="5"
       :single-select="singleSelect"
       v-model="selected"
@@ -91,6 +91,10 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
+
+          <v-dialog v-model="showImg" max-width="500px">
+            <v-img :src="imgUrl" max-width="500px" max-height="500px"></v-img>
+          </v-dialog>
         </v-toolbar>
       </template>
 
@@ -99,6 +103,7 @@
           class="my-1"
           max-width="100"
           max-height="100"
+          @click="scaleImg(BASE_URL + '/' + item.shopHead)"
           :src="BASE_URL + '/' + item.shopHead"
         ></v-img>
       </template>
@@ -193,7 +198,9 @@
         selectCampusVal: '全部校区',
         selectStatusVal: '未审核',
         campusSelectIndex: 0,
-        statusSelectIndex: 0
+        statusSelectIndex: 0,
+        imgUrl: '',
+        showImg: false
       }
     },
     components: {
@@ -293,6 +300,10 @@
       },
       reviewMultiOut() {
         console.log('批量淘汰');
+      },
+      scaleImg(url) {
+        this.imgUrl = url
+        this.showImg = true
       }
     }
   }

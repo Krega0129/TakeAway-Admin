@@ -27,10 +27,21 @@
 
           <v-select
             dense
-            class="mt-6"
-            :items="selectItem"
+            class="mt-6 mr-5"
+            :items="campus"
             style="width: 30px"
-            label="请选择校区"
+            label="全部校区"
+            v-model="selectCampusVal"
+            solo
+          ></v-select>
+
+          <v-select
+            dense
+            class="mt-6"
+            :items="status"
+            style="width: 30px"
+            label="全部"
+            v-model="selectStatusVal"
             solo
           ></v-select>
 
@@ -62,11 +73,11 @@
 
           <v-dialog v-model="reviewRider" max-width="500px">
             <v-card>
-              <v-card-title class="headline">确定通过审核?</v-card-title>
+              <v-card-title class="headline">确定{{toStatus === 1 ? '': '不'}}通过审核?</v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="cancelReview">取消</v-btn>
-                <v-btn color="blue darken-1" text @click="confirmReview">确定</v-btn>
+                <v-btn color="blue darken-1" text @click="closeDialog">取消</v-btn>
+                <v-btn color="blue darken-1" text @click="_updateReviewStatus">确定</v-btn>
                 <v-spacer></v-spacer>
               </v-card-actions>
             </v-card>
@@ -88,6 +99,34 @@
         </v-icon>
         详情
         </v-btn>
+        <v-btn 
+          small
+          color="success"
+          class="mx-2"
+          v-if="selectStatusVal == '待审核'"
+          @click="openDialog(item, 1)">
+        <v-icon
+          small
+          class="mr-2"
+        >
+          mdi-check
+        </v-icon>
+          通过
+        </v-btn>
+        <v-btn 
+          small
+          color="error"
+          v-if="selectStatusVal == '待审核'"
+          class="mx-2"
+          @click="openDialog(item, 2)">
+        <v-icon
+          small
+          class="mr-2"
+        >
+          mdi-block-helper
+        </v-icon>
+          不通过
+        </v-btn>
       </template>
     </v-data-table>
     <router-view v-else></router-view>
@@ -95,6 +134,16 @@
 </template>
 
 <script>
+  import { H_config } from '../../../../network/config'
+  import {
+    getAllCampus
+  } from '../../../../network/work';
+  import {
+    getRiderByStatus,
+    updateReviewStatus
+  } from '../../../../network/rider'
+  import { showTip } from '../../../../utils';
+
   export default {
     name: 'riderVerify',
     data() {
@@ -104,39 +153,56 @@
             text: '骑手姓名',
             align: 'start',
             sortable: false,
-            value: 'riderName'
+            value: 'driverName'
           },
           {
             text: '骑手电话',
-            align: 'center',
+            align: 'start',
             sortable: false,
-            value: 'riderTel'
+            value: 'driverPhone'
           },
           {
             text: '详情',
             align: 'center',
             sortable: false,
             value: 'actions',
-            width: 200
+            width: 400
           },
         ],
-        riders: [
-          {
-            riderName: '啊强',
-            riderTel: '111111111111'
-          },
-          {
-            riderName: '啊龙',
-            riderTel: '222222222222'
-          }
-        ],
+        riders: [],
         search: '',
         reviewRider: false,
         editIndex: -1,
         multiSelect: false,
         singleSelect: false,
         selected: [],
-        selectItem: ['广工', '广大']
+        campus: ['全部校区'],
+        selectCampusVal: '',
+        status: ['待审核', '已通过', '未通过'],
+        selectStatusVal: '待审核',
+        // 要改变成哪个状态
+        toStatus: null
+      }
+    },
+    async mounted() {
+      await getAllCampus().then(res => {
+        if(res.code == H_config.STATECODE_campus_SUCCESS) {
+          for(let school of res.data) {
+            this.campus.push(school.campusName)
+          }
+        }
+      })
+
+      this._getRiderByStatus()
+    },
+    watch: {
+      selectCampusVal() {
+        this.selectCampusVal = this.selectCampusVal == '全部校区' ? '' : this.selectCampusVal
+        this._getRiderByStatus()
+      },
+      selectStatusVal() {
+        this.riders = []
+        this._getRiderByStatus()
       }
     },
     methods: {
@@ -146,18 +212,43 @@
           typeof value === 'string' &&
           value.toString().indexOf(search) !== -1;
       },
+      _getRiderByStatus() {
+        getRiderByStatus({
+          driverStatus: this.status.indexOf(this.selectStatusVal),
+          campusName: this.selectCampusVal
+        }).then(res => {
+          if(res.code === H_config.STATECODE_rider_SUCCESS) {
+            this.riders = res.data
+          }
+        })
+      },
       riderDetails(item) {
         this.editIndex = this.riders.indexOf(item)
+        this.$store.commit('updateRiderStatus', item.driverStatus)
         this.$router.push('riderVerify/riderDetails')
       },
-      cancelReview() {
-        this.editIndex = -1;
-        this.deleteShop = false
+      _updateReviewStatus() {
+        updateReviewStatus({
+          driverId: this.riders[this.editIndex].driverId,
+          driverStatus: this.toStatus
+        }).then(res => {
+          if(res.code === H_config.STATECODE_rider_SUCCESS) {
+            this.riders.splice(this.editIndex, 1)
+            showTip.call(this, '修改成功')
+          } else {
+            showTip.call(this, '修改失败', 'error')
+          }
+          this.closeDialog()
+        })
       },
-      confirmReview() {
-        this.riders.slice(this.editIndex, 1)
-        this.editIndex = -1;
-        this.deleteShop = false
+      openDialog(item, status) {
+        this.editIndex = this.riders.indexOf(item)
+        this.toStatus = status
+        this.reviewRider = true
+      },
+      closeDialog() {
+        this.editIndex = -1
+        this.reviewRider = false
       },
       reviewMultiPass() {
         console.log('批量通过');

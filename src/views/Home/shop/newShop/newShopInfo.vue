@@ -26,6 +26,10 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+
+        <v-dialog v-model="showImg" max-width="500px">
+          <v-img :src="imgUrl" max-width="500px" max-height="500px"></v-img>
+        </v-dialog>
       </template>
 
       <template v-slot:[`item.infoValue`]="{ item }">
@@ -34,6 +38,7 @@
           class="my-1"
           max-width="100"
           max-height="100"
+          @click="scaleImg(BASE_URL + '/' + item.infoValue)"
           :src="BASE_URL + '/' + item.infoValue"
         ></v-img>
         <div v-else>{{item.infoValue}}</div>
@@ -99,6 +104,8 @@
         flag: '',
         BASE_URL: BASE_URL,
         keys: ['campusAddress', 'contactPhone', 'detailAddress', 'shopCategory', 'shopHead', 'shopIntroduce', 'shopName'],
+        imgUrl: '',
+        showImg: false
       }
     },
     components: {
@@ -154,6 +161,10 @@
       },
       cancelReview() {
         this.passReview = false
+      },
+      scaleImg(url) {
+        this.imgUrl = url
+        this.showImg = true
       }
     }
   }

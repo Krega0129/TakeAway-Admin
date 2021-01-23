@@ -1,14 +1,20 @@
 <template>
   <div class="searchOrder">
+
+    <component
+      :is="tip"
+      :alertText="alertText"
+      :alertType="alertType"
+      :showTip="show"
+    ></component>
+
     <v-data-table
       :headers="headers"
       :items="orders"
       class="elevation-1"
-      :search="search"
       no-data-text="没有数据"
-      :custom-filter="filterOnlyCapsText"
+      hide-default-footer
       item-key="shopName"
-      :items-per-page="5"
       v-if="this.$route.meta.title === '订单查询'"
     >
       <template v-slot:top>
@@ -16,9 +22,19 @@
           <v-text-field
             v-model="search"
             append-icon="mdi-magnify"
-            label="搜索订单"
+            :rules="rule"
+            label="输入订单编号"
             class="mt-6"
           ></v-text-field>
+          <v-btn
+            color="primary"
+            class="ml-5"
+            @click="_getOrderByOrderNum"
+            :disabled="disable"
+          >
+            搜索
+          </v-btn>
+          <v-spacer></v-spacer>
         </v-toolbar>
       </template>
       
@@ -43,6 +59,13 @@
 </template>
 
 <script>
+  import { H_config } from '../../../network/config';
+  import {
+    getOrderByOrderNum
+  } from '../../../network/work';
+  import tip from '../../../components/tip';
+  import { showTip } from '../../../utils';
+
   export default {
     name: 'searchOrder',
     data() {
@@ -52,19 +75,19 @@
             text: '用户',
             align: 'center',
             sortable: false,
-            value: 'user',
+            value: 'userName',
           },
           {
             text: '订单编号',
             align: 'center',
             sortable: false,
-            value: 'orderNum'
+            value: 'orderNumber'
           },
           {
             text: '下单时间',
             align: 'center',
             sortable: false,
-            value: 'orderTime'
+            value: 'completeTime'
           },
           {
             text: '查看详情',
@@ -74,26 +97,52 @@
             value: 'actions'
           }
         ],
-        orders: [
-          {
-            user: '啊强',
-            orderNum: '111111111111111111',
-            orderTime: '2021-01-16 09:30'
-          }
-        ],
+        orders: [],
         search: '',
-        orderIndex: -1
+        rule: [
+          v => /^[0-9]{15,16}$/.test(v) || '订单编号必须为15-16位数字',
+        ],
+        show: false,
+        alertText: '',
+        alertType: 'success',
+        disable: true,
+      }
+    },
+    components: {
+      tip
+    },
+    computed: {
+      tip() {
+        return 'tip'
+      }
+    },
+    watch: {
+      search(val) {
+        if(/^[0-9]{15,16}$/.test(val)) {
+          this.disable = false
+        } else {
+          this.disable = true
+        }
       }
     },
     methods: {
-      filterOnlyCapsText(value, search, item) {
-        return value != null &&
-          search != null &&
-          typeof value === 'string' &&
-          value.toString().indexOf(search) !== -1;
+      _getOrderByOrderNum() {
+        getOrderByOrderNum({
+          orderNumber: this.search
+        }).then(res => {
+          if(res.code === H_config.STATECODE_getOrderByOrderNum_SUCCESS) {
+            this.orders = []
+            this.orders.push(res.data)
+            showTip.call(this, '查询成功')
+          } else if(res.code === H_config.STATECODE_getOrderByOrderNum_FAILED) {
+            showTip.call(this, res.msg, 'primary')
+          } else {
+            showTip.call(this, '查询失败', 'error')
+          }
+        })
       },
       checkOrderDetails(item) {
-        this.orderIndex = this.orders.indexOf(item)
+        this.$store.commit('updateOrder', item)
         this.$router.push('searchOrder/orderDetails')
       }
     }

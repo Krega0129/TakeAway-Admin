@@ -1,6 +1,5 @@
 <template>
-  <div>
-
+  <div class="shopRenewDetails">
     <component
       :is="tip"
       :alertText="alertText"
@@ -31,6 +30,29 @@
           </v-dialog>
         </v-toolbar>
       </template>
+
+      <template v-slot:[`item.oldDetails`]="{ item }">
+        <v-img
+          v-if="item.InfoName == '店铺头像'"
+          class="my-1"
+          max-width="100"
+          max-height="100"
+          :src="BASE_URL + '/' + item.oldDetails"
+        ></v-img>
+        <div v-else>{{item.oldDetails}}</div>
+      </template>
+
+      <template v-slot:[`item.newDetails`]="{ item }">
+        <v-img
+          v-if="item.InfoName == '店铺头像'"
+          class="my-1"
+          max-width="100"
+          max-height="100"
+          :src="BASE_URL + '/' + item.newDetails"
+        ></v-img>
+        <div v-else>{{item.newDetails}}</div>
+      </template>
+
     </v-data-table>
     <div class="text-center mt-4" v-if="$store.state.shopReviewStatus == 0">
       <v-btn
@@ -64,6 +86,7 @@
     reviewShopRenewInfo,
     auditShopUpdate
   } from '../../../../network/shop'
+  import { BASE_URL, H_config } from '../../../../network/config';
 
   import tip from '../../../../components/tip'
   import { showTip, close } from '../../../../utils';
@@ -72,6 +95,7 @@
     name: 'shopRenewDetails',
     data() {
       return {
+        BASE_URL: BASE_URL,
         passReview: false,
         headers: [
           {

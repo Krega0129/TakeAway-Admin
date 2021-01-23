@@ -14,7 +14,7 @@ export function auditShopUpdate(data) {
   })
 }
 
-// 
+// 获取店铺修改审核
 export function reviewDetails(data) {
   return axios({
     method: 'post',

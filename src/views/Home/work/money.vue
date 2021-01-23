@@ -10,6 +10,7 @@
         label="全部校区"
         dense
         solo
+        v-model="selectCampusVal"
         style="max-width: 20vw"
       ></v-select>
       
@@ -76,64 +77,80 @@
 
 <script>
   const echarts = require('echarts')
+  import {
+    getAllCampus
+  } from '../../../network/work'
+  import { H_config } from '../../../network/config';
   export default {
     name: 'money',
     data() {
       return {
-        campus: ['全部', '广工'],
+        campus: ['全部校区'],
+        selectCampusVal: '全部校区',
         time: ['七天内', '一个月', '一年内', '总计'],
         date: new Date().toISOString().substr(0, 10),
         modal: false,
         maxDate: new Date().toISOString().substr(0, 10)
       }
     },
-    mounted() {
-      let myChartA = echarts.init(this.$refs.echartA);
-      let myChartB = echarts.init(this.$refs.echartB);
-      let optionA = {
-        title: {
-          text: '盈利'
-        },
-        tooltip: {},
-        legend: {
-          data:['盈利']
-        },
-        xAxis: {
-          data: ['a', 'b', 'c', 'd', 'e', 'f', 'g']
-        },
-        yAxis: {},
-        series: [{
-          name: '盈利',
-          type: 'bar',
-          data: [5, 20, 36, 10, 10, 20, 12]
-        }]
-      };
-      let optionB = {
-        title: {
-          text: '今日收入'
-        },
-        width: 150,
-        tooltip: {},
-        xAxis: {
-          data: ["今日收入"]
-        },
-        yAxis: {},
-        series: [{
-          name: '今日收入',
-          type: 'bar',
-          data: [65]
-        }]
-      };
-
-      // 使用刚指定的配置项和数据显示图表。
-      myChartA.setOption(optionA);
-      myChartB.setOption(optionB);
+    async mounted() {
+      await getAllCampus().then(res => {
+        if(res.code == H_config.STATECODE_campus_SUCCESS) {
+          for(let school of res.data) {
+            this.campus.push(school.campusName)
+          }
+        }
+      })
+      this.renewCharts()
     },
     watch: {
-      
+      selectCampusVal() {
+        
+      }
     },
     methods: {
-      
+      renewCharts() {
+        let myChartA = echarts.init(this.$refs.echartA);
+        let myChartB = echarts.init(this.$refs.echartB);
+        let optionA = {
+          title: {
+            text: '盈利'
+          },
+          tooltip: {},
+          legend: {
+            data:['盈利']
+          },
+          xAxis: {
+            data: ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+          },
+          yAxis: {},
+          series: [{
+            name: '盈利',
+            type: 'bar',
+            data: [5, 20, 36, 10, 10, 20, 12]
+          }]
+        };
+        let optionB = {
+          title: {
+            text: '今日收入'
+          },
+          width: 150,
+          tooltip: {},
+          xAxis: {
+            data: ["今日收入"]
+          },
+          yAxis: {},
+          series: [{
+            name: '今日收入',
+            type: 'bar',
+            data: [65]
+          }]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChartA.setOption(optionA);
+        myChartB.setOption(optionB);
+      }
     }
   }
 </script>

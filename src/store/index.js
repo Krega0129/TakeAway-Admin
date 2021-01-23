@@ -12,7 +12,13 @@ export default new Vuex.Store({
     shopReviewStatus: 0,
     shopId: -1,
     shopOldInfo: {},
-    shopNewInfo: {}
+    shopNewInfo: {},
+
+    rider: {},
+    riderStatus: -1,
+    riderId: -1,
+
+    order: {}
   },
   mutations: {
     changeShopInfo(state, payload){
@@ -28,6 +34,15 @@ export default new Vuex.Store({
     },
     changeShopId(state, payload) {
       state.shopId = payload
+    },
+    updateRiderId(state, payload) {
+      state.riderId = payload
+    },
+    updateRiderStatus(state, payload) {
+      state.riderStatus = payload
+    },
+    updateOrder(state, payload) {
+      state.order = payload
     }
   },
   actions: {

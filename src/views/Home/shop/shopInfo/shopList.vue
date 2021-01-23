@@ -1,5 +1,13 @@
 <template>
   <div class="shopList">
+
+    <component
+      :is="tip"
+      :alertText="alertText"
+      :alertType="alertType"
+      :showTip="show"
+    ></component>
+
     <v-data-table
       :headers="headers"
       :items="shop"
@@ -62,18 +70,22 @@
             解封店铺
           </v-btn>
 
-          <v-dialog v-model="banShop" max-width="500px">
+          <v-dialog v-model="dialog" max-width="500px">
             <v-card>
-              <v-card-title class="headline">确定{{isBan ? '解封': '封停'}}该店铺?</v-card-title>
+              <v-card-title class="headline">确定{{titleText}}该店铺?</v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="cancelBan">取消</v-btn>
-                <v-btn color="blue darken-1" text @click="confirmBan">确定</v-btn>
+                <v-btn color="blue darken-1" text @click="closeDialog">取消</v-btn>
+                <v-btn color="blue darken-1" text @click="btnStatus(titleText)">确定</v-btn>
                 <v-spacer></v-spacer>
               </v-card-actions>
             </v-card>
           </v-dialog>
         </v-toolbar>
+      </template>
+
+      <template v-slot:[`item.runStatus`]="{ item }">
+        {{item.runStatus == 0 ? '营业中' : item.runStatus == 1 ? '已打烊' : '停业中'}}
       </template>
       
       <template v-slot:[`item.actions`]="{ item }">
@@ -90,33 +102,34 @@
         </v-icon>
         详情
         </v-btn>
+
         <v-btn 
           small
-          color="error"
+          :color="item.topChecked ? 'orange' : 'blue'"
           class="mx-2"
-          @click="changeUpdate(item)"
-          v-if="item.runStatus != 2">
+          @click="changeUpdate(item, 0)">
         <v-icon
           small
           class="mr-2"
         >
-          mdi-menu
+          mdi-{{item.topChecked ? 'close' : 'arrow-up'}}
         </v-icon>
-        封停店铺
+          {{item.topChecked ? '取消置顶' : '置顶店铺'}}
         </v-btn>
+
+        
         <v-btn 
           small
-          color="success"
+          :color="item.runStatus == 2 ? 'success' : 'error'"
           class="mx-2"
-          @click="changeUpdate(item)"
-          v-else>
+          @click="changeUpdate(item, 1)">
         <v-icon
           small
           class="mr-2"
         >
-          mdi-menu
+          mdi-{{item.runStatus == 2 ? 'check' : 'block-helper'}}
         </v-icon>
-        解封店铺
+        {{item.runStatus == 2 ? '解封店铺' : '封停店铺'}}
         </v-btn>
       </template>
     </v-data-table>
@@ -130,10 +143,12 @@
   } from '../../../../network/work';
   import {
     getShop,
-    updateAllRunStatus
+    updateAllRunStatus,
+    updateTopStatus
   } from '../../../../network/shop';
   import { H_config } from '../../../../network/config';
   import { showTip, close } from '../../../../utils';
+  import tip from '../../../../components/tip'
 
   export default {
     name: 'shopList',
@@ -150,28 +165,34 @@
             text: '状态',
             align: 'start',
             sortable: false,
-            value: 'shopStatus'
+            value: 'runStatus'
           },
           {
             text: '详情', 
             value: 'actions', 
-            width: 300,
+            width: 400,
             align: 'center',
             sortable: false 
           }
         ],
         shop: [],
         search: '',
-        banShop: false,
+        dialog: false,
+        title: ['置顶', '取消置顶','封停', '解封'],
+        titleText: '',
         editIndex: -1,
         multiSelect: false,
         singleSelect: false,
         selected: [],
         campus: ['全部校区'],
         campusSelectVal: '',
-        campusSelectIndex: 0,
-        isBan: false
+        show: false,
+        alertText: '',
+        alertType: 'success'
       }
+    },
+    components: {
+      tip
     },
     mounted() {
       getAllCampus().then(res => {
@@ -181,13 +202,16 @@
           }
         }
       })
-
       this._getShop()
     },
     watch: {
-      campusSelectVal(val) {
-        // this.campusSelectIndex = this.campus.indexOf(val)
+      campusSelectVal() {
         this._getShop()
+      }
+    },
+    computed: {
+      tip() {
+        return 'tip'
       }
     },
     methods: {
@@ -196,6 +220,9 @@
           search != null &&
           typeof value === 'string' &&
           value.toString().indexOf(search) !== -1;
+      },
+      btnStatus(titleText) {
+        this.title.indexOf(titleText) < 2 ? this.changeTopStatus() : this.updateBanStatus()
       },
       _getShop() {
         getShop({
@@ -213,30 +240,44 @@
         this.$store.commit('changeShopId', item.shopId)
         this.$router.push('shopList/shopInfo')
       },
-      changeUpdate(item) {
+      changeUpdate(item, index) {
         this.editIndex = this.shop.indexOf(item)
-        this.isBan = item.runStatus == 2
-        this.banShop = true
+        this.titleText = index == 0 ? this.title[item.topChecked] : item.runStatus == 2 
+                                    ? this.title[3] : this.title[2]
+        this.dialog = true
       },
-      cancelBan() {
+      closeDialog() {
         this.editIndex = -1;
-        this.banShop = false
+        this.dialog = false
       },
-      async confirmBan() {
+      async updateBanStatus() {
         await updateAllRunStatus({
-          runStatus: this.isBan ? 1 : 2,
+          runStatus: this.shop[this.editIndex].runStatus == 2 ? 1 : 2,
           shopIds: this.shop[this.editIndex].shopId
         }).then(res => {
-          console.log(res);
           if(res.code == H_config.STATECODE_update_SUCCESS) {
-            this.shop[this.editIndex].runStatus = this.isBan ? 1 : 2
-            showTip.call(this, this.isBan ? '解封成功' : '封停成功')
+            this.shop[this.editIndex].runStatus = this.shop[this.editIndex].runStatus == 2 ? 1 : 2
+            showTip.call(this, '修改成功')
           } else {
-            showTip.call(this, this.isBan ? '解封失败' : '封停失败', 'error')
+            showTip.call(this, '修改失败', 'error')
           }
         })
         this.editIndex = -1;
-        this.banShop = false
+        this.closeDialog()
+      },
+      async changeTopStatus() {
+        await updateTopStatus({
+          shopIds: this.shop[this.editIndex].shopId,
+          topStatus: Number(this.shop[this.editIndex].topChecked == 0)
+        }).then(res => {
+          if(res.code == H_config.STATECODE_update_SUCCESS) {
+            this.shop[this.editIndex].topChecked = Number(!this.shop[this.editIndex].topChecked)
+            showTip.call(this, '修改成功')
+          } else {
+            showTip.call(this, '修改失败', 'error')
+          }
+        })
+        this.closeDialog()
       },
       closeShop() {
         console.log('批量关店');

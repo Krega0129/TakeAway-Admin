@@ -1,7 +1,7 @@
 <template>
   <v-alert
     dense
-    style="max-width: 200px; position: absolute; bottom: 10%; left: 50%; translateX(-50%)"
+    style="max-width: 200px; position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%)"
     class="mx-auto"
     :type="alertType"
     v-model="show"

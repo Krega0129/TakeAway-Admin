@@ -97,3 +97,15 @@ export function test(data) {
     }
   })
 }
+
+// 根据订单号查询订单
+export function getOrderByOrderNum(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_getOrderByOrderNum_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}

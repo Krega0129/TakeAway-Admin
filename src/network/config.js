@@ -26,8 +26,9 @@ H_config.API_selectPhotos_URL = '/managerInfo/selectPhotos'
 H_config.API_deletePhoto_URL = '/managerInfo/deletePhoto'
 H_config.STATECODE_selectPhotos_NULL_FAILED = 1500   // 参数为空（删除图片适用）
 // 根据订单编号查询订单
-H_config.API_getOrderById_URL = '/order/selectAllOrderInfo'
-// H_config.STATECODE_campus_SUCCESS = 
+H_config.API_getOrderByOrderNum_URL = '/order/selectAllOrderInfo'
+H_config.STATECODE_getOrderByOrderNum_SUCCESS = 3208
+H_config.STATECODE_getOrderByOrderNum_FAILED = 3555
 
 // 店铺
 H_config.STATECODE_get_SUCCESS = 1200 // 查询成功

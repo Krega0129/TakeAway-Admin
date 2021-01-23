@@ -118,24 +118,24 @@
           }
         ],
         users: [
-          {
-            userName: '啊强',
-            userAccount: '11111111111',
-            content: '啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
-            img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
-          },
-          {
-            userName: '啊龙',
-            userAccount: '11111111111',
-            content: 'asdhgakdgrgirtyrhhg',
-            img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
-          },
-          {
-            userName: '啊锴',
-            userAccount: '11111111111',
-            content: 'asdhgakdgrgirtyrhhg',
-            img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
-          }
+          // {
+          //   userName: '啊强',
+          //   userAccount: '11111111111',
+          //   content: '啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
+          //   img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
+          // },
+          // {
+          //   userName: '啊龙',
+          //   userAccount: '11111111111',
+          //   content: 'asdhgakdgrgirtyrhhg',
+          //   img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
+          // },
+          // {
+          //   userName: '啊锴',
+          //   userAccount: '11111111111',
+          //   content: 'asdhgakdgrgirtyrhhg',
+          //   img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
+          // }
         ],
         search: '',
         multiSelect: false,
@@ -157,7 +157,7 @@
       reviewMultiPass() {
         console.log('批量通过');
       },
-      reviewMultiPass() {
+      reviewMultiOut() {
         console.log('批量淘汰');
       }
     }

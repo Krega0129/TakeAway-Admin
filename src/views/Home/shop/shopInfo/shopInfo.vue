@@ -16,8 +16,63 @@
             class="mt-16"
             max-width="100"
             max-height="100"
+            @click="scaleImg(BASE_URL + '/' + shopHead)"
             :src="BASE_URL + '/' + shopHead"
           ></v-img>
+          <v-dialog v-model="showImg" max-width="500px">
+            <v-img :src="imgUrl" max-width="500px" max-height="500px"></v-img>
+          </v-dialog>
+          <v-spacer></v-spacer>
+          <v-btn
+            dark
+            @click="_shopIdGetCommodity"
+          >
+            店铺商品
+          </v-btn>
+          <v-dialog v-model="showCommodity" max-width="1000px">
+            <v-card>
+              <v-data-table
+                :headers="commodityHeaders"
+                :items="shopCommodity"
+                class="elevation-1"
+                no-data-text="没有数据"
+                hide-default-footer
+                item-key="commodityName"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat>
+                    <v-toolbar-title class="mr-16">店铺商品</v-toolbar-title>
+                    <v-dialog v-model="showSpecs" max-width="500px">
+                      <v-card>
+                        <v-data-table
+                          :headers="specsHeaders"
+                          :items="specs"
+                          class="elevation-1"
+                          no-data-text="没有数据"
+                          hide-default-footer
+                          item-key="commodityName"
+                        ></v-data-table>
+                      </v-card>
+                    </v-dialog>
+                  </v-toolbar>
+                </template>
+
+                <template v-slot:[`item.commodityPhoto`]="{ item }">
+                  <v-img
+                    class="my-1"
+                    max-width="50"
+                    max-height="50"
+                    @click="scaleImg(BASE_URL + '/' + item.commodityPhoto)"
+                    :src="BASE_URL + '/' + item.commodityPhoto"
+                  ></v-img>
+                </template>
+                <template v-slot:[`item.specs`]="{ item }">
+                  <v-btn dark v-if="item.specs[0]" @click="_getSpecs(item.specs)">查看规格</v-btn>
+                  <div v-else>无</div>
+                </template>
+              </v-data-table>
+            </v-card>
+          </v-dialog>
         </v-toolbar>
       </template>
     </v-data-table>
@@ -26,7 +81,8 @@
 
 <script>
   import {
-    shopIdGetShop
+    shopIdGetShop,
+    shopIdGetCommodity
   } from '../../../../network/shop';
   import { BASE_URL, H_config } from '../../../../network/config';
 
@@ -52,11 +108,75 @@
         shopInfo: [],
         keys: ['campusAddress', 'runStatus', 'contactPhone', 'detailAddress', 'shopCategory',  'shopIntroduce', 'topChecked'],
         shopName: '商家名字',
-        shopHead: ''
+        shopHead: '',
+        showCommodity: false,
+        commodityHeaders: [
+          {
+            text: '商品所属分类',
+            align: 'start',
+            sortable: false,
+            value: 'categoryName',
+          },
+          {
+            text: '商品名',
+            align: 'start',
+            sortable: false,
+            value: 'commodityName',
+          },
+          {
+            text: '图片',
+            align: 'start',
+            sortable: false,
+            value: 'commodityPhoto',
+          },
+          {
+            text: '详情',
+            align: 'start',
+            sortable: false,
+            value: 'commodityDetail',
+          },
+          {
+            text: '规格',
+            align: 'start',
+            sortable: false,
+            value: 'specs',
+          },
+          {
+            text: '基础价格（元）',
+            align: 'start',
+            sortable: false,
+            value: 'commodityPrice',
+          },
+        ],
+        shopCommodity: [],
+        showSpecs: false,
+        specsHeaders: [
+          {
+            text: '规格名称',
+            align: 'start',
+            sortable: false,
+            value: 'specName',
+          },
+          {
+            text: '规格属性',
+            align: 'start',
+            sortable: false,
+            value: 'attributeName',
+          },
+          {
+            text: '额外价格（元）',
+            align: 'start',
+            sortable: false,
+            value: 'attributePrice',
+          }
+        ],
+        specs: [],
+        imgUrl: '',
+        showImg: false
       }
     },
-    mounted() {
-      shopIdGetShop({
+    async mounted() {
+      await shopIdGetShop({
         shopId: this.$store.state.shopId
       }).then(res => {
         if(res.code == H_config.STATECODE_get_SUCCESS) {
@@ -65,7 +185,7 @@
           this.shopHead = shop.shopHead
           let keys = Object.keys(shop)
           for(let i in keys) {
-            if(this.keys.indexOf(keys[i]) != -1) {
+            if(this.keys.indexOf(keys[i]) !== -1) {
               let shopInfo = {}
               switch(keys[i]) {
                 case 'campusAddress': shopInfo.InfoName = '校区'; break;
@@ -91,9 +211,38 @@
           }
         }
       })
+    
+      shopIdGetCommodity({
+        shopId: this.$store.state.shopId
+      }).then(res => {
+        if(res.code == H_config.STATECODE_get_SUCCESS) {
+          let shop = res.data
+          for(let cate of shop) {
+            for(let food of cate.dates) {
+              food.categoryName = cate.categoryName
+              this.shopCommodity.push(food)
+            }
+          }
+        }
+      })
     },
     methods: {
-
+      _shopIdGetCommodity() {
+        this.showCommodity = true
+      },
+      _getSpecs(allSpecs) {
+        this.showSpecs = true
+        for(let specs of allSpecs) {
+          for(let spec of specs.attributes) {
+            spec.specName = specs.specName
+            this.specs.push(spec)
+          }
+        }
+      },
+      scaleImg(url) {
+        this.imgUrl = url
+        this.showImg = true
+      }
     }
   }
 </script>
