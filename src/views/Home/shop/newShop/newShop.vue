@@ -302,7 +302,7 @@
         console.log('批量淘汰');
       },
       scaleImg(url) {
-        this.imgUrl = url
+        this.imgUrl = url 
         this.showImg = true
       }
     }
