@@ -5,6 +5,14 @@
     color="blue-grey darken-4"
     style="width: 100%; height: 100vh;"
   >
+
+    <component
+      :is="tip"
+      :alertText="alertText"
+      :alertType="alertType"
+      :showTip="show"
+    ></component>
+
     <v-form
       ref="form"
       v-model="valid"
@@ -23,11 +31,11 @@
 
       <v-text-field
         v-model="password"
-        :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+        :append-icon="showPassW ? 'mdi-eye' : 'mdi-eye-off'"
         :rules="passwordRules"
-        :type="show ? 'text' : 'password'"
+        :type="showPassW ? 'text' : 'password'"
         label="密码"
-        @click:append="show = !show"
+        @click:append="showPassW = !showPassW"
         required
       ></v-text-field>
 
@@ -50,13 +58,16 @@
 </template>
 
 <script>
+  import tip from '../components/tip';
+  import { showTip } from '../utils';
+
   export default {
     data() {
       return {
         // 是否合法
         valid: true,
         // 显示密码
-        show: false,
+        showPassW: false,
         account: '',
         accountRules: [
           v => !!v || '账号不能为空',
@@ -64,18 +75,33 @@
         ],
         password: '',
         passwordRules: [
-          v => (!!v && v.length >= 6 && v.length <= 16) || '密码长度必须为6-16位',
-          v => /^[a-zA-Z0-9_]{6,16}$/.test(v) || '密码含非法字符',
-        ]
+          v => (!!v && v.length >= 5 && v.length <= 16) || '密码长度必须为6-16位',
+          v => /^[a-zA-Z0-9_]{5,16}$/.test(v) || '密码含非法字符',
+        ],
+        alertText: '',
+        alertType: 'success',
+        show: false,
       }
     },
-    mounted() {
-      // 测试vuex
-      // this.$store.dispatch('increment')
+    components: {
+      tip
+    },
+    computed: {
+      tip() {
+        return 'tip'
+      }
     },
     methods: {
       validate () {
         this.$refs.form.validate()
+        if(this.account == 'admin' && this.password === 'admin') {
+          localStorage.setItem('takeAwayManage_TOKEN', 11)
+          this.$store.commit('login', this.account)
+          showTip.call(this, '登录成功')
+          this.$router.replace('/admin') 
+        } else {
+          showTip.call(this, '账号或密码错误', 'error')
+        }
       }
     }
   }

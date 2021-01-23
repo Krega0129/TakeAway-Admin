@@ -181,8 +181,8 @@ const routes = [
     children: adminRoute,
     // 判断是否登录
     beforeEnter: (to, from, next) => {
-      if (!localStorage.takeAwayManage_TOKEN) {
-        next({ [meta.title]: 'login' })
+      if (!localStorage.getItem('takeAwayManage_TOKEN')) {
+        next({ path: '/login' })
       } else {
         next()
       }
@@ -198,7 +198,7 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.BASE_URL,
   routes
 })

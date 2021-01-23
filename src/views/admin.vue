@@ -46,12 +46,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-avatar>
-        <img
-          src="https://cdn.vuetifyjs.com/images/john.jpg"
-          alt="John"
-        >
-      </v-avatar>
+        你好，{{this.$store.state.account}}
 
       <v-btn icon>
         <v-icon>mdi-dots-vertical</v-icon>

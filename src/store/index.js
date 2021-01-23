@@ -6,6 +6,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    account: '',
+
     shopList: [],
     currentShop: {},
     currentShopIndex: -1,
@@ -21,6 +23,9 @@ export default new Vuex.Store({
     order: {}
   },
   mutations: {
+    login(state, payload) {
+      state.account = payload
+    },
     changeShopInfo(state, payload){
       state.shopOldInfo = payload.shopOldInfo
       state.shopNewInfo = payload.shopNewInfo
