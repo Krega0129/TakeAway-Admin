@@ -101,8 +101,8 @@
       <template v-slot:[`item.shopHead`]="{ item }">
         <v-img
           class="my-1"
-          max-width="100"
-          max-height="100"
+          max-width="50"
+          max-height="50"
           @click="scaleImg(BASE_URL + '/' + item.shopHead)"
           :src="BASE_URL + '/' + item.shopHead"
         ></v-img>
@@ -255,10 +255,10 @@
           address: this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal
         }).then(res => {
           if(res && res.code == H_config.STATECODE_get_SUCCESS) {
-            this.$store.commit('updateShopList', res.data)
+            // this.$store.commit('updateShopList', res.data)
             this.shops = res.data
           } else if(res && res.code == H_config.STATECODE_getNull_FAILED) {
-            this.$store.commit('updateShopList', [])
+            // this.$store.commit('updateShopList', [])
             this.shops = []
           }
         })

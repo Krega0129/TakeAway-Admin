@@ -229,6 +229,7 @@ import { H_config } from '../../../../network/config';
           shopNewInfo: this.shopList[this.editedIndex][0],
           shopOldInfo: this.shopList[this.editedIndex][1]
         })
+        this.$store.commit('updateShopReviewStatus', item.auditChecked)
         this.$router.push('shopRenewInfo/shopRenewDetails')
       },
       // 审核

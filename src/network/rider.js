@@ -62,6 +62,14 @@ export function updateReviewStatus(data) {
   })
 }
 
+// 修改骑手审核状态
+export function selectById(data) {
+  return axios({
+    url: H_config.API_selectById_URL, 
+    params: data
+  })
+}
+
 // 删除骑手信息
 export function deleteRiderInfo(data) {
   return axios({

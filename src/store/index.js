@@ -8,7 +8,7 @@ export default new Vuex.Store({
   state: {
     account: '',
 
-    shopList: [],
+    // shopList: [],
     currentShop: {},
     currentShopIndex: -1,
     shopReviewStatus: 0,
@@ -19,6 +19,7 @@ export default new Vuex.Store({
     rider: {},
     riderStatus: -1,
     riderId: -1,
+    // riderIndex: -1,
 
     order: {}
   },
@@ -30,12 +31,15 @@ export default new Vuex.Store({
       state.shopOldInfo = payload.shopOldInfo
       state.shopNewInfo = payload.shopNewInfo
     },
-    updateShopList(state, payload) {
-      state.shopList = payload
-    },
+    // updateShopList(state, payload) {
+    //   state.shopList = payload
+    // },
     updateCurrentShop(state, payload) {
       state.currentShop = payload.shop
       state.shopReviewStatus = payload.status
+    },
+    updateShopReviewStatus(state, payload) {
+      state.shopReviewStatus = payload
     },
     changeShopId(state, payload) {
       state.shopId = payload
@@ -43,6 +47,9 @@ export default new Vuex.Store({
     updateRiderId(state, payload) {
       state.riderId = payload
     },
+    // updateRiderIndex(state, payload) {
+    //   state.riderIndex = payload
+    // },
     updateRiderStatus(state, payload) {
       state.riderStatus = payload
     },
@@ -55,5 +62,7 @@ export default new Vuex.Store({
   },
   modules: {
   },
-  plugins: [createPersistedState()],
+  plugins: [createPersistedState(
+    { storage: window.sessionStorage }
+  )],
 })

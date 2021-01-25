@@ -282,8 +282,8 @@
               this.license.push(img)
             }
           }
+          this.showLicense = true
         })
-        this.showLicense = true
       },
       scaleImg(url) {
         this.imgUrl = url

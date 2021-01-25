@@ -23,8 +23,22 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
+          <v-dialog v-model="showImg" max-width="500px">
+            <v-img :src="imgUrl"></v-img>
+          </v-dialog>
         </v-toolbar>
       </template>
+
+      <template v-slot:[`item.infoValue`]="{ item }">
+        <v-img
+          class="my-1"
+          max-width="80"
+          max-height="80"
+          @click="scaleImg(BASE_URL + '/' + item.infoValue)"
+          :src="BASE_URL + '/' + item.infoValue"
+        ></v-img>
+      </template>
+
     </v-data-table>
     <div class="text-center mt-4" v-if="$store.state.riderStatus === 0">
       <v-btn
@@ -56,14 +70,16 @@
 <script>
 import {
   updateReviewStatus,
+  selectById
 } from '../../../../network/rider';
-import { H_config } from '../../../../network/config';
+import { H_config, BASE_URL } from '../../../../network/config';
 import { showTip, close } from '../../../../utils';
 
 export default {
   name: 'riderDetails',
   data() {
     return {
+      BASE_URL: BASE_URL, 
       headers: [
         {
           text: '信息名称',
@@ -81,8 +97,33 @@ export default {
       riderInfo: [],
       riderName: '骑手姓名',
       dialog: false,
-      status: this.$store.state.riderStatus
+      status: this.$store.state.riderStatus,
+      keys: ['schoolCard', 'studentCard', 'driverIdcardFront', 'driverIdcardBehind'],
+      imgUrl: '',
+      showImg: false
     }
+  },
+  mounted() {
+    selectById({
+      driverId: this.$store.state.riderId
+    }).then(res => {
+      const driver = res.data[0]
+      this.riderName = driver.driverName
+      let keys = Object.keys(driver)
+      for(let i in keys) {
+        if(this.keys.indexOf(keys[i]) !== -1) {
+          let driverInfo = {}
+          switch(keys[i]) {
+            case 'studentCard': driverInfo.infoName = '学生卡'; break;
+            case 'schoolCard': driverInfo.infoName = '校园卡'; break;
+            case 'driverIdcardFront': driverInfo.infoName = '身份证正面'; break;
+            case 'driverIdcardBehind': driverInfo.infoName = '身份证反面'; break;
+          }
+          driverInfo.infoValue = driver[keys[i]]
+          this.riderInfo.push(driverInfo)
+        }
+      }
+    })
   },
   methods: {
     _updateReviewStatus() {
@@ -94,6 +135,7 @@ export default {
           this.state = this.status == 3 ? 1 : 3
           this.$store.commit('updateRiderStatus', this.status)
           showTip.call(this, '修改成功')
+          this.$bus.$emit('changeRiderReviewStatus', this.$store.state.riderId)
           close.call(this)
         } else {
           showTip.call(this, '修改失败', 'error')
@@ -111,6 +153,10 @@ export default {
     },
     closeDialog() {
       this.dialog = false
+    },
+    scaleImg(url) {
+      this.imgUrl = url
+      this.showImg = true
     }
   }
 }

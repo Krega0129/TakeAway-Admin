@@ -1,5 +1,13 @@
 <template>
   <div class="poster">
+
+    <component
+      :is="tip"
+      :alertText="alertText"
+      :alertType="alertType"
+      :showTip="show"
+    ></component>
+
     <v-toolbar
       dense
       flat
@@ -88,11 +96,11 @@
               <v-card
                 class="mx-auto pa-3 text-right"
               >
-                  <v-file-input
-                    accept="image/*"
-                    label="上传图片"
-                    v-model="img"
-                  ></v-file-input>
+                <v-file-input
+                  accept="image/*"
+                  label="上传图片"
+                  v-model="img"
+                ></v-file-input>
 
                 <v-spacer></v-spacer>
                 <v-btn
@@ -115,8 +123,20 @@
             <v-btn 
               class="mx-2" 
               color="error"
-              :disabled="!selected[0]"
+              :disabled="selected[0] == null"
+              @click="deletePhotos"
             >删除</v-btn>
+            <v-dialog v-model="deletePoster" max-width="500px">
+              <v-card>
+                <v-card-title class="headline">确定删除该海报？</v-card-title>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="blue darken-1" text @click="cancelDelete">取消</v-btn>
+                  <v-btn color="red" text @click="confirmDelete">确定</v-btn>
+                  <v-spacer></v-spacer>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
             <v-spacer></v-spacer>
           </v-toolbar>
         </v-card>
@@ -149,13 +169,13 @@
 </template>
 
 <script>
-  import { showTip, close } from '../../../utils'
+  import { showTip } from '../../../utils'
+  import tip from '../../../components/tip';
   import {
     updatePhoto,
-    updatePhotos,
     getAllCampus,
     selectPhotos,
-    test
+    deletePhoto
   } from '../../../network/work'
   import { BASE_URL, H_config } from '../../../network/config'
 
@@ -186,7 +206,14 @@
         campusList: [],
         campusSelectVal: '请选择校区',
         campusSelectIndex: 0,
+        show: false,
+        alertText: '',
+        alertType: 'success',
+        deletePoster: false
       }
+    },
+    components: {
+      tip
     },
     async mounted() {
       await getAllCampus().then(res => {
@@ -200,10 +227,18 @@
         }
       })
     },
+    computed: {
+      tip() {
+        return 'tip'
+      }
+    },
     watch: {
       campusSelectVal(val) {
         this.campusSelectIndex = this.campus.indexOf(val)
         this._getAllPosters()
+      },
+      selected(val) {
+        console.log(val);
       }
     },
     methods: {
@@ -221,15 +256,42 @@
       uploadImg() {
         let formData = new FormData()
         formData.append('file', this.img)
-        formData.append('name', '2')
-
-        test(formData).then(res => {
-          console.log(res);
+        formData.append('campusId', this.campusList[this.campusSelectIndex].campusId)
+        updatePhoto(formData).then(res => {
+          if(res.code === H_config.STATECODE_updatePhoto_SUCCESS) {
+            this.cancelUpload()
+            this._getAllPosters()
+            showTip.call(this, '上传成功')
+          } else {
+            showTip.call(this, '上传失败', 'error')
+          }
         })
       },
       cancelUpload() {
         this.img = null
         this.newDialog = false
+      },
+      deletePhotos() {
+        this.deletePoster = true
+      },
+      async confirmDelete() {
+        for(let i = 0; i < this.selected.length; i++) {
+          await deletePhoto({
+            photoId: this.posterURL[this.selected[i]].photoId
+          }).then(res => {
+            if(res.code === H_config.STATECODE_deletePhoto_SUCCESS) {
+              showTip.call(this, '删除成功')
+            } else {
+              showTip.call(this, '删除失败', 'error')
+            }
+          })
+        }
+        this._getAllPosters()
+        this.cancelDelete()
+      },
+      cancelDelete() {
+        this.selected = []
+        this.deletePoster = false
       }
     }
   }

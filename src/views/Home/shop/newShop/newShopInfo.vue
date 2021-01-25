@@ -75,7 +75,7 @@
 <script>
   import tip from '../../../../components/tip';
   import { showTip, close } from '../../../../utils';
-  import { BASE_URL } from '../../../../network/config';
+  import { BASE_URL, H_config } from '../../../../network/config';
   import { reviewNewShop } from '../../../../network/shop'
 
   export default {
@@ -152,8 +152,7 @@
           auditStatus: flag,
           shopIds: this.$store.state.currentShop.shopId
         }).then(res => {
-          if(res.code == 1202) {
-            console.log(res)
+          if(res.code == H_config.STATECODE_update_SUCCESS) {
             showTip.call(this, this.flag==''?'审核通过':'审核不通过')
             close.call(this)
           }

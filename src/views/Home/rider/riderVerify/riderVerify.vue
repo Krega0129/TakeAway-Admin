@@ -194,6 +194,12 @@
       })
 
       this._getRiderByStatus()
+      this.$bus.$on('changeRiderReviewStatus', () => {
+        this.riders.splice(this.editIndex, 1)
+      })
+    },
+    beforeDestroy() {
+      this.$bus.$off('changeRiderReviewStatus')
     },
     watch: {
       selectCampusVal() {
@@ -225,6 +231,7 @@
       riderDetails(item) {
         this.editIndex = this.riders.indexOf(item)
         this.$store.commit('updateRiderStatus', item.driverStatus)
+        this.$store.commit('updateRiderId', item.driverId)
         this.$router.push('riderVerify/riderDetails')
       },
       _updateReviewStatus() {

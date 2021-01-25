@@ -18,6 +18,7 @@ H_config.API_deleteCampus_URL = '/campus/delete'
 H_config.API_updatePhoto_URL = '/managerInfo/updatePhoto'
 H_config.API_updatePhotos_URL = '/managerInfo/updatePhotos'
 H_config.STATECODE_updatePhoto_SUCCESS = 1205
+H_config.STATECODE_deletePhoto_SUCCESS = 1203
 H_config.STATECODE_updatePhoto_NULL_FAILED = 1516   // 文件为空
 H_config.STATECODE_updatePhoto_TYPE_FAILED = 1517   // 文件类型错误
 H_config.STATECODE_updatePhoto_FAILED = 1518        // 文件上传失败
@@ -63,6 +64,7 @@ H_config.API_getRiderInfo_URL = '/driverinfo/selectById'
 H_config.API_getRiderByStatus_URL = '/driverinfo/selectByStatus'  // 没有成功状态码
 H_config.API_updateRiderInfo_URL = '/driverinfo/update'
 H_config.API_updateReviewStatus_URL = '/driverinfo/updateStatus'
+H_config.API_selectById_URL = '/driverprove/selectById'
 H_config.API_deleteRiderInfo_URL = '/driverinfo/delete'
 
 // 分享校园
@@ -76,7 +78,7 @@ H_config.API_updateShareSchoolStatus_URL = '/shareschool/updateStatus'
 H_config.STATECODE_updateShareSchoolStatus_SUCCESSSTATUS = 2220
 
 
-H_config.API_test_URL = '/modifyCommodity/updateHead'
+H_config.API_test_URL = '/modifyShopInfo/updatePhoto'
 
 export {
   BASE_URL,

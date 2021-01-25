@@ -18,8 +18,8 @@ export default function axios(option) {
       const token = localStorage.getItem('takeAwayManage_TOKEN') || null
       config.headers.token = token
       // 3.对请求的参数进行序列化(看服务器是否需要序列化)
-      if (typeof config.data == 'object' && JSON.stringify(config.data).indexOf('{') == 0) { //判断变量m是不是json对象
-          config.data = qs.stringify(config.data)
+      if (typeof config.data == 'object' && Object.prototype.toString.call(config.data) !== '[object FormData]' && JSON.stringify(config.data).indexOf('{') == 0) { //判断变量m是不是json对象
+        config.data = qs.stringify(config.data)
       }
       // 4.等等
       return config

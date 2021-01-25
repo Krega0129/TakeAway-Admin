@@ -44,7 +44,7 @@ export function deleteCampus(data) {
   })
 }
 
-// 多图片上传
+// 图片上传
 export function updatePhoto(data) {
   return axios({
     method: 'post',
@@ -83,18 +83,6 @@ export function deletePhoto(data) {
     method: 'post',
     url: H_config.API_deletePhoto_URL, 
     data: data,
-  })
-}
-
-// 删除图片
-export function test(data) {
-  return axios({
-    method: 'post',
-    url: H_config.API_test_URL, 
-    data: data,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
   })
 }
 

@@ -80,6 +80,10 @@
 </template>
 
 <script>
+  import {
+    getAllShareSchool
+  } from '../../../network/user';
+
   export default {
     name: 'user',
     data() {
@@ -143,12 +147,23 @@
         selected: []
       }
     },
+    mounted() {
+      this._getAllShareSchool()
+    },
     methods: {
       filterOnlyCapsText(value, search, item) {
       return value != null &&
         search != null &&
         typeof value === 'string' &&
         value.toString().indexOf(search) !== -1;
+      },
+      _getAllShareSchool() {
+        getAllShareSchool({
+          pageNum: 1,
+          pageSize: 100
+        }).then(res => {
+          console.log(res);
+        })
       },
       reviewUser(item) {
         this.orderIndex = this.users.indexOf(item)

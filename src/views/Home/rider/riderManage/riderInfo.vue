@@ -31,6 +31,28 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
+          <v-spacer></v-spacer>
+          <v-btn
+            dark
+            @click="_getRiderLicense"
+          >
+            审核资料
+          </v-btn>
+          <v-dialog v-model="showLicense" max-width="500px">
+            <v-card class="d-flex justify-space-between flex-wrap pa-5">
+              <div class="text-center my-2" v-for="item in license" :key="item.url">
+                <div>{{item.name}}</div>
+                <v-img 
+                  max-width="200px" 
+                  max-height="200px" 
+                  :src="BASE_URL + '/' + item.url"
+                  @click="scaleImg(BASE_URL + '/' + item.url)"></v-img>
+              </div>
+            </v-card>
+          </v-dialog>
+          <v-dialog v-model="showImg" max-width="500px">
+            <v-img :src="imgUrl"></v-img>
+          </v-dialog>
         </v-toolbar>
       </template>
     </v-data-table>
@@ -48,10 +70,11 @@
 </template>
 
 <script>
-  import { H_config } from '../../../../network/config';
+  import { H_config, BASE_URL } from '../../../../network/config';
   import {
     getRiderInfo,
-    updateReviewStatus
+    updateReviewStatus,
+    selectById
   } from '../../../../network/rider';
   import tip from '../../../../components/tip';
   import { showTip } from '../../../../utils'
@@ -60,6 +83,7 @@
     name: 'banAccount',
     data() {
       return {
+        BASE_URL: BASE_URL,
         headers: [
           {
             text: '信息名称',
@@ -81,7 +105,12 @@
         show: false,
         alertText: '',
         alertType: 'success',
-        dialog: false
+        dialog: false,
+        LicenseKeys: ['studentCard', 'schoolCard', 'driverIdcardFront', 'driverIdcardBehind'],
+        showLicense: false,
+        license: [],
+        showImg: false,
+        imgUrl: ''
       }
     },
     components: {
@@ -148,6 +177,33 @@
           }
           this.closeDialog()
         })
+      },
+      _getRiderLicense() {
+        selectById({
+          driverId: this.$store.state.riderId
+        }).then(res => {
+          this.showLicense = true
+          const driver = res.data[0]
+          let keys = Object.keys(driver)
+          for(let i in keys) {
+            if(this.LicenseKeys.indexOf(keys[i]) !== -1) {
+              let driverInfo = {}
+              switch(keys[i]) {
+                case 'studentCard': driverInfo.name = '学生卡'; break;
+                case 'schoolCard': driverInfo.name = '校园卡'; break;
+                case 'driverIdcardFront': driverInfo.name = '身份证正面'; break;
+                case 'driverIdcardBehind': driverInfo.name = '身份证反面'; break;
+              }
+              driverInfo.url = driver[keys[i]]
+              this.license.push(driverInfo)
+            }
+          }
+          console.log(this.license);
+        })
+      },
+      scaleImg(url) {
+        this.imgUrl = url
+        this.showImg = true
       }
     }
   }
