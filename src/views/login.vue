@@ -96,6 +96,7 @@
         this.$refs.form.validate()
         if(this.account == 'admin' && this.password === 'admin') {
           localStorage.setItem('takeAwayManage_TOKEN', 11)
+          localStorage.setItem('account', this.account)
           this.$store.commit('login', this.account)
           showTip.call(this, '登录成功')
           this.$router.replace('/admin') 

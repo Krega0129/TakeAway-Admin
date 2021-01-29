@@ -12,6 +12,8 @@
       :items-per-page="5"
       :single-select="singleSelect"
       v-model="selected"
+      :loading="loading"
+      loading-text="加载中...请稍后"
       v-if="this.$route.meta.title === '信息审核'"
     >
       <template v-slot:top>
@@ -181,7 +183,8 @@
         status: ['待审核', '已通过', '未通过'],
         selectStatusVal: '待审核',
         // 要改变成哪个状态
-        toStatus: null
+        toStatus: null,
+        loading: true
       }
     },
     async mounted() {
@@ -190,6 +193,8 @@
           for(let school of res.data) {
             this.campus.push(school.campusName)
           }
+        } else {
+          showTip.call(this, '网络异常', 'error')
         }
       })
 
@@ -204,10 +209,12 @@
     watch: {
       selectCampusVal() {
         this.selectCampusVal = this.selectCampusVal == '全部校区' ? '' : this.selectCampusVal
+        this.loading = true
         this._getRiderByStatus()
       },
       selectStatusVal() {
         this.riders = []
+        this.loading = true
         this._getRiderByStatus()
       }
     },
@@ -225,7 +232,10 @@
         }).then(res => {
           if(res.code === H_config.STATECODE_rider_SUCCESS) {
             this.riders = res.data
+          } else {
+            showTip.call(this, '网络异常', 'error')
           }
+          this.loading = false
         })
       },
       riderDetails(item) {

@@ -20,6 +20,8 @@
       :items-per-page="5"
       :single-select="singleSelect"
       v-model="selected"
+      :loading="loading"
+      loading-text="加载中...请稍后"
       v-if="this.$route.meta.title === '修改审核'"
     >
       <template v-slot:top>
@@ -102,6 +104,7 @@
             small
             color="success"
             class="mx-2"
+            v-if="item.auditChecked === 0"
             @click="review(item)">
           <v-icon
             small
@@ -171,7 +174,8 @@ import { H_config } from '../../../../network/config';
         alertType: 'success',
         show: false,
         statusSelectVal: '未审核',
-        statusSelectIndex: 0
+        statusSelectIndex: 0,
+        loading: true
       }
     },
     components: {
@@ -191,11 +195,13 @@ import { H_config } from '../../../../network/config';
       },
       $route(val) {
         if(val.fullPath == '/admin/shopRenewInfo') {
+          this.loading = true
           this._reviewDetails()
         }
       },
       statusSelectVal(val) {
         this.statusSelectIndex = this.selectItem.indexOf(val)
+        this.loading = true
         this._reviewDetails()
       }
     },
@@ -211,14 +217,18 @@ import { H_config } from '../../../../network/config';
         reviewDetails({
           auditStatus: this.statusSelectIndex
         }).then(res => {
-          console.log(res);
-          if(res.code == 1200) {
+          if(res.code == H_config.STATECODE_get_SUCCESS) {
             this.desserts = []
             this.shopList = res.data
             for(let item of this.shopList) {
               this.desserts.push(item[0])
             }
+          } else if(res.code === H_config.STATECODE_getNull_FAILED) {
+            this.desserts = []
+          } else {
+            showTip.call(this, '网络异常', 'error')
           }
+          this.loading = false
         })
       },
       // 详情
@@ -255,7 +265,6 @@ import { H_config } from '../../../../network/config';
       // 取消
       cancelReview () {
         this.passReview = false
-        showTip.call(this, '审核已取消')
       },
       // 多选通过
       reviewMultiPass() {

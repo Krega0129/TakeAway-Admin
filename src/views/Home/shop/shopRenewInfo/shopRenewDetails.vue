@@ -19,10 +19,10 @@
         <v-toolbar flat>
           <v-dialog v-model="passReview" max-width="500px">
             <v-card>
-              <v-card-title class="headline">确定通过审核?</v-card-title>
+              <v-card-title class="headline">确定{{status === 1 ? '' : '不'}}通过审核?</v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="cancelReview">取消</v-btn>
+                <v-btn color="blue darken-1" text @click="closeDialog">取消</v-btn>
                 <v-btn color="blue darken-1" text @click="confirmReview">确定</v-btn>
                 <v-spacer></v-spacer>
               </v-card-actions>
@@ -59,7 +59,7 @@
         large
         color="error"
         class="mx-2"
-        @click="cancelReview"
+        @click="openDialog(2)"
       >
         审核不通过
       </v-btn>
@@ -67,7 +67,7 @@
         large
         color="success"
         class="mx-2"
-        @click="confirmReview"
+        @click="openDialog(1)"
       >
         审核通过
       </v-btn>
@@ -83,7 +83,6 @@
 
 <script>
   import { 
-    reviewShopRenewInfo,
     auditShopUpdate
   } from '../../../../network/shop'
   import { BASE_URL, H_config } from '../../../../network/config';
@@ -123,6 +122,7 @@
         updateId: null,
         alertText: '',
         alertType: 'success',
+        status: null,
         show: false
       }
     },
@@ -148,7 +148,9 @@
             case 'contactPhone': diffInfo.InfoName = '联系电话'; break;
             case 'detailAddress': diffInfo.InfoName = '详细地址'; break;
             case 'shopCategory': diffInfo.InfoName = '店铺分类'; break;
-            case 'shopHead': diffInfo.InfoName = '店铺头像'; break;
+            case 'shopHead': diffInfo.InfoName = '店铺头像';
+                  if(!newInfo[newKeys[i]]) continue
+                  break;
             case 'shopIntroduce': diffInfo.InfoName = '商铺简介'; break;
             case 'shopName': diffInfo.InfoName = '商铺名称'; break;
           }
@@ -159,22 +161,25 @@
       }
     },
     methods: {
+      openDialog(status) {
+        this.status = status
+        this.passReview = true
+      },
+      closeDialog() {
+        this.status = null
+        this.passReview = false
+      },
       confirmReview() {
         auditShopUpdate({
-          auditStatus: 1,
+          auditStatus: this.status,
           ids: this.updateId
         }).then(res => {
-          showTip.call(this, '审核已通过')
-          close.call(this)
-        })
-      },
-      cancelReview() {
-        auditShopUpdate({
-          auditStatus: 2,
-          ids: this.updateId
-        }).then(res => {
-          showTip.call(this, '审核不通过', 'error')
-          close.call(this)
+          if(res.code === H_config.STATECODE_review_SUCCESS) {
+            showTip.call(this, '修改成功')
+            close.call(this)
+          } else {
+            showTip.call(this, '网络异常', 'error')
+          }
         })
       }
     }

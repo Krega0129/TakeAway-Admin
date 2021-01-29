@@ -17,6 +17,8 @@
       :custom-filter="filterOnlyCapsText"
       item-key="riderName"
       :items-per-page="5"
+      :loading="loading"
+      loading-text="加载中...请稍后"
       v-if="this.$route.meta.title === '骑手管理'"
     >
       <template v-slot:top>
@@ -166,6 +168,7 @@ export default {
       show: false,
       alertText: '',
       alertType: 'success',
+      loading: true
     }
   },
   components: {
@@ -194,9 +197,11 @@ export default {
       
     },
     selectCampusVal() {
+      this.loading = true
       this._getAllRiders()
     },
     selectStatusVal() {
+      this.loading = true
       this._getAllRiders()
     }
   },
@@ -223,6 +228,7 @@ export default {
         if(res.code == H_config.STATECODE_rider_SUCCESS) {
           this.riders = res.data
         }
+        this.loading = false
       })
     },
     riderDetails(item) {

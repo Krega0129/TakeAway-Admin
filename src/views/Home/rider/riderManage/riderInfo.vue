@@ -16,6 +16,8 @@
       hide-default-footer
       hide-default-header
       item-key="infoName"
+      :loading="loading"
+      loading-text="加载中...请稍后"
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -110,7 +112,8 @@
         showLicense: false,
         license: [],
         showImg: false,
-        imgUrl: ''
+        imgUrl: '',
+        loading: true
       }
     },
     components: {
@@ -145,7 +148,10 @@
               this.riderInfo.push(riderInfo)
             }
           }
+        } else {
+          showTip.call(this, res.msg, 'error')
         }
+        this.loading = false
       })
     },
     computed: {
@@ -182,23 +188,28 @@
         selectById({
           driverId: this.$store.state.riderId
         }).then(res => {
-          this.showLicense = true
-          const driver = res.data[0]
-          let keys = Object.keys(driver)
-          for(let i in keys) {
-            if(this.LicenseKeys.indexOf(keys[i]) !== -1) {
-              let driverInfo = {}
-              switch(keys[i]) {
-                case 'studentCard': driverInfo.name = '学生卡'; break;
-                case 'schoolCard': driverInfo.name = '校园卡'; break;
-                case 'driverIdcardFront': driverInfo.name = '身份证正面'; break;
-                case 'driverIdcardBehind': driverInfo.name = '身份证反面'; break;
+          console.log(res);
+          if(res.code === H_config.STATECODE_rider_SUCCESS) {
+            this.license = []
+            const driver = res.data[0]
+            let keys = Object.keys(driver)
+            for(let i in keys) {
+              if(this.LicenseKeys.indexOf(keys[i]) !== -1) {
+                let driverInfo = {}
+                switch(keys[i]) {
+                  case 'studentCard': driverInfo.name = '学生卡'; break;
+                  case 'schoolCard': driverInfo.name = '校园卡'; break;
+                  case 'driverIdcardFront': driverInfo.name = '身份证正面'; break;
+                  case 'driverIdcardBehind': driverInfo.name = '身份证反面'; break;
+                }
+                driverInfo.url = driver[keys[i]]
+                this.license.push(driverInfo)
               }
-              driverInfo.url = driver[keys[i]]
-              this.license.push(driverInfo)
             }
+            this.showLicense = true
+          } else {
+            showTip.call(this, '网络异常', 'error')
           }
-          console.log(this.license);
         })
       },
       scaleImg(url) {

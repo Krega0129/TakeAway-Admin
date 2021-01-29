@@ -20,6 +20,8 @@
       :items-per-page="5"
       :single-select="singleSelect"
       v-model="selected"
+      :loading="loading"
+      loading-text="加载中...请稍后"
       v-if="this.$route.meta.title === '查看信息'"
     >
       <template v-slot:top>
@@ -188,7 +190,8 @@
         campusSelectVal: '',
         show: false,
         alertText: '',
-        alertType: 'success'
+        alertType: 'success',
+        loading: true
       }
     },
     components: {
@@ -206,6 +209,7 @@
     },
     watch: {
       campusSelectVal() {
+        this.loading = true
         this._getShop()
       }
     },
@@ -232,7 +236,10 @@
             this.shop = res.data
           } else if(res.code == H_config.STATECODE_getNull_FAILED) {
             this.shop = []
+          } else {
+            showTip.call(this, '网络异常', 'error')
           }
+          this.loading = false 
         })
       },
       shopDetails(item) {

@@ -19,21 +19,26 @@
     >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            :rules="rule"
-            label="输入订单编号"
-            class="mt-6"
-          ></v-text-field>
-          <v-btn
-            color="primary"
-            class="ml-5"
-            @click="_getOrderByOrderNum"
-            :disabled="disable"
+          <v-form
+            v-model="disable"
+            class="d-flex"
           >
-            搜索
-          </v-btn>
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              :rules="rule"
+              label="输入订单编号"
+              class="mt-6"
+            ></v-text-field>
+            <v-btn
+              color="primary"
+              class="ml-5 mt-6"
+              @click="_getOrderByOrderNum"
+              :disabled="!disable"
+            >
+              搜索
+            </v-btn>
+          </v-form>
           <v-spacer></v-spacer>
         </v-toolbar>
       </template>
@@ -116,15 +121,6 @@
         return 'tip'
       }
     },
-    watch: {
-      search(val) {
-        if(/^[0-9]{15,16}$/.test(val)) {
-          this.disable = false
-        } else {
-          this.disable = true
-        }
-      }
-    },
     methods: {
       _getOrderByOrderNum() {
         getOrderByOrderNum({
@@ -148,7 +144,3 @@
     }
   }
 </script>
-
-<style lang="scss" scoped>
-  
-</style>

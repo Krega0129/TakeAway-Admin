@@ -143,12 +143,13 @@
       </v-dialog>
     </v-toolbar>
     
+    <div v-if="loading" class="grey--text text-center mt-16">加载中...请稍等</div>
 
     <v-carousel
       class="mx-auto mt-3"
       cycle
       style="width: 70vw"
-      v-if="posterURL[0]"
+      v-else-if="posterURL[0]"
       hide-delimiter-background
       show-arrows-on-hover
     >
@@ -209,7 +210,8 @@
         show: false,
         alertText: '',
         alertType: 'success',
-        deletePoster: false
+        deletePoster: false,
+        loading: true
       }
     },
     components: {
@@ -224,6 +226,8 @@
           for(let school of this.campusList) {
             this.campus.push(school.campusName)
           }
+        } else {
+          showTip.call(this, '网络异常', 'error')
         }
       })
     },
@@ -235,6 +239,7 @@
     watch: {
       campusSelectVal(val) {
         this.campusSelectIndex = this.campus.indexOf(val)
+        this.loading = true
         this._getAllPosters()
       },
       selected(val) {
@@ -250,7 +255,10 @@
             this.posterURL = res.data
           } else if(res.code == H_config.STATECODE_getNull_FAILED) {
             this.posterURL = []
+          } else {
+            showTip.call(this, '网络异常', 'error')
           }
+          this.loading = false
         })
       },
       uploadImg() {

@@ -46,11 +46,35 @@
 
       <v-spacer></v-spacer>
 
-        你好，{{this.$store.state.account}}
+        你好，{{account}}
 
-      <v-btn icon>
+      <!-- <v-btn icon>
         <v-icon>mdi-dots-vertical</v-icon>
-      </v-btn>
+      </v-btn> -->
+      <v-menu
+        bottom
+        right
+        offset-y
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            icon
+            v-bind="attrs"
+            v-on="on"
+          >
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="(item, i) in menu"
+            :key="i"
+            @click="() => {}"
+          >
+            <v-list-item-title class="black--text px-4"> {{ item.title }} </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </v-app-bar>
     <v-main class="main">
       <v-container fluid>
@@ -139,14 +163,19 @@
             route: '/admin/user'
           }
         ],
-        title: '资金管理'
+        title: '资金管理',
+        menu: [
+          {
+            title: '退出登录'
+          }
+        ],
+        account: localStorage.getItem('account')
       }
     },
     components: {
       
     },
     mounted() {
-      // 刷新页面返回资金管理页面
       this.title = this.$route.meta.title
     },
     watch: {
@@ -155,9 +184,6 @@
           this.title = val.meta.title
         }
       }
-    },
-    methods: {
-      
     }
   }
 </script>

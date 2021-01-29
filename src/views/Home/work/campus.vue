@@ -20,6 +20,8 @@
       :items-per-page="5"
       :single-select="singleSelect"
       v-model="selected"
+      :loading="loading"
+      loading-text="加载中...请稍后"
       v-if="this.$route.meta.title === '设置校区'"
     >
       <template v-slot:top>
@@ -53,37 +55,43 @@
                 <span class="headline">{{ formTitle }}</span>
               </v-card-title>
 
-              <v-card-text>
-                <v-container>
-                    <v-text-field
-                      v-model="editedItem.campusName"
-                      label="校区名"
-                    ></v-text-field>
-                    <v-text-field
-                      v-model="editedItem.campusCost"
-                      :rules="rules"
-                      label="配送费"
-                    ></v-text-field>
-                </v-container>
-              </v-card-text>
+              <v-form
+                v-model="valid"
+              >
+                <v-card-text>
+                  <v-container>
+                      <v-text-field
+                        v-model="editedItem.campusName"
+                        label="校区名"
+                        :rules="campusNameRule"
+                      ></v-text-field>
+                      <v-text-field
+                        v-model="editedItem.campusCost"
+                        :rules="rules"
+                        label="配送费"
+                      ></v-text-field>
+                  </v-container>
+                </v-card-text>
 
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="close"
-                >
-                  取消
-                </v-btn>
-                <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="save"
-                >
-                  保存
-                </v-btn>
-              </v-card-actions>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    color="blue darken-1"
+                    text
+                    @click="close"
+                  >
+                    取消
+                  </v-btn>
+                  <v-btn
+                    color="blue darken-1"
+                    text
+                    :disabled="!valid"
+                    @click="save"
+                  >
+                    保存
+                  </v-btn>
+                </v-card-actions>
+              </v-form>
             </v-card>
           </v-dialog>
 
@@ -145,7 +153,7 @@
     H_config
   } from '../../../network/config'
   import tip from '../../../components/tip';
-  import { showTip, close } from '../../../utils'
+  import { showTip } from '../../../utils'
 
   export default {
     name: 'campus',
@@ -179,9 +187,13 @@
           }
         ],
         rules: [
-          v => !!v || '配送费不能为空',
-          v => /^[0-9]+([.]\d{1,2})?$/.test(v) || '最多包含两位小数'
+          v => v != null || '配送费不能为空',
+          v => /^[0-9]+([.]\d{1,2})?$/.test(v) || '必须为数字且最多包含两位小数'
         ],
+        campusNameRule: [
+          v => !!v || '校区名不能为空'
+        ],
+        valid: true,
         campus: [],
         selected: [],
         singleSelect: false,
@@ -197,7 +209,8 @@
         },
         show: false,
         alertText: '',
-        alertType: 'success'
+        alertType: 'success',
+        loading: true
       }
     },
     components: {
@@ -216,13 +229,15 @@
       _getAllCampus() {
         getAllCampus().then(res => {
           if(res.code == H_config.STATECODE_campus_SUCCESS) {
-            console.log(res);
             this.campus = []
             let campusList = res.data
             for(let campus of campusList) {
               this.campus.push(campus)
             }
+          } else {
+            showTip.call(this, '网络异常', 'error')
           }
+          this.loading = false
         })
       },
       editCampus(item) {

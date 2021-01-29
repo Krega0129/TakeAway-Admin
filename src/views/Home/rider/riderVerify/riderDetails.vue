@@ -8,6 +8,8 @@
       hide-default-footer
       hide-default-header
       item-key="infoName"
+      :loading="loading"
+      loading-text="加载中...请稍后"
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -45,14 +47,14 @@
         large
         color="error"
         class="mx-2"
-        @click="disPass"
+        @click="openDialog(2)"
       >
         审核不通过
       </v-btn>
       <v-btn
         large
         color="success"
-        @click="pass"
+        @click="openDialog(1)"
         class="mx-2"
       >
         审核通过
@@ -100,7 +102,8 @@ export default {
       status: this.$store.state.riderStatus,
       keys: ['schoolCard', 'studentCard', 'driverIdcardFront', 'driverIdcardBehind'],
       imgUrl: '',
-      showImg: false
+      showImg: false,
+      loading: true
     }
   },
   mounted() {
@@ -123,6 +126,7 @@ export default {
           this.riderInfo.push(driverInfo)
         }
       }
+      this.loading = false
     })
   },
   methods: {
@@ -143,14 +147,18 @@ export default {
         this.closeDialog()
       })
     },
-    disPass() {
-      this.status = 2
+    openDialog(status) {
+      this.status = status
       this.dialog = true
     },
-    pass() {
-      this.status = 1
-      this.dialog = true
-    },
+    // disPass() {
+    //   this.status = 2
+    //   this.dialog = true
+    // },
+    // pass() {
+    //   this.status = 1
+    //   this.dialog = true
+    // },
     closeDialog() {
       this.dialog = false
     },

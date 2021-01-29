@@ -8,6 +8,8 @@
       hide-default-footer
       hide-default-header
       item-key="infoName"
+      :loading="loading"
+      loading-text="加载中...请稍后"
     >
       <template v-slot:top>
         <v-toolbar style="height: 20vh" flat>
@@ -194,7 +196,8 @@
         specs: [],
         imgUrl: '',
         showImg: false,
-        license: []
+        license: [],
+        loading: true
       }
     },
     async mounted() {
@@ -231,7 +234,10 @@
               this.shopInfo.push(shopInfo)
             }
           }
+        } else {
+          showTip.call(this, '网络异常', 'error')
         }
+        this.loading = false
       })
     
       shopIdGetCommodity({
@@ -245,6 +251,8 @@
               this.shopCommodity.push(food)
             }
           }
+        } else {
+          showTip.call(this, '网络异常', 'error')
         }
       })
     },
@@ -267,6 +275,7 @@
         }).then(res => {
           if(res.code === H_config.STATECODE_get_SUCCESS) {
             let license = res.data
+            this.license = []
             let keys = Object.keys(license)
             for(let i in keys) {
               let img = {}
@@ -281,6 +290,8 @@
               img.url = license[keys[i]]
               this.license.push(img)
             }
+          } else {
+            showTip.call(this, '网络异常', 'error')
           }
           this.showLicense = true
         })

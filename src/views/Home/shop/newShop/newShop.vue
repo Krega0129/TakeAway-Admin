@@ -20,6 +20,8 @@
       :items-per-page="5"
       :single-select="singleSelect"
       v-model="selected"
+      :loading="loading"
+      loading-text="加载中...请稍后"
       v-if="this.$route.meta.title === '新店申请'"
     >
       <template v-slot:top>
@@ -151,7 +153,7 @@
     getAllCampus
   } from '../../../../network/work'
   import tip from '../../../../components/tip';
-  import { showTip, close } from '../../../../utils';
+  import { showTip } from '../../../../utils';
   import { 
     BASE_URL,
     H_config
@@ -200,7 +202,8 @@
         campusSelectIndex: 0,
         statusSelectIndex: 0,
         imgUrl: '',
-        showImg: false
+        showImg: false,
+        loading: true
       }
     },
     components: {
@@ -215,6 +218,8 @@
           for(let campus of campusList) {
             this.campus.push(campus.campusName)
           }
+        } else {
+          showTip.call(this, '网络异常', 'error')
         }
       })
     },
@@ -224,15 +229,18 @@
       },
       '$route'(val) {
         if(val.fullPath == '/admin/newShop') {
+          this.loading = true
           this._getShop()
         }
       },
       selectCampusVal(val) {
         this.campusSelectIndex = this.campus.indexOf(val)
+        this.loading = true
         this._getShop()
       },
       selectStatusVal(val) {
         this.statusSelectIndex = this.status.indexOf(val)
+        this.loading = true
         this._getShop()
       }
     },
@@ -260,7 +268,10 @@
           } else if(res && res.code == H_config.STATECODE_getNull_FAILED) {
             // this.$store.commit('updateShopList', [])
             this.shops = []
+          } else {
+            showTip.call(this, '网络异常', 'error')
           }
+          this.loading = false
         })
       },
       // 详情

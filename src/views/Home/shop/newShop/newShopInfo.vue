@@ -155,6 +155,8 @@
           if(res.code == H_config.STATECODE_update_SUCCESS) {
             showTip.call(this, this.flag==''?'审核通过':'审核不通过')
             close.call(this)
+          } else {
+            showTip.call(this, '网络异常', 'error')
           }
         })
       },
