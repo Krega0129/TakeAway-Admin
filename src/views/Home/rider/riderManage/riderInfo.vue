@@ -1,12 +1,8 @@
 <template>
   <div class="banAccount">
 
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
+    <toast ref="toast"></toast>
+    <img-dialog ref="img"></img-dialog>
 
     <v-data-table
       :headers="headers"
@@ -48,12 +44,9 @@
                   max-width="200px" 
                   max-height="200px" 
                   :src="BASE_URL + '/' + item.url"
-                  @click="scaleImg(BASE_URL + '/' + item.url)"></v-img>
+                  @click="$refs.img.scaleImg(BASE_URL + '/' + item.url)"></v-img>
               </div>
             </v-card>
-          </v-dialog>
-          <v-dialog v-model="showImg" max-width="500px">
-            <v-img :src="imgUrl"></v-img>
           </v-dialog>
         </v-toolbar>
       </template>
@@ -78,8 +71,9 @@
     updateReviewStatus,
     selectById
   } from '../../../../network/rider';
-  import tip from '../../../../components/tip';
-  import { showTip } from '../../../../utils'
+  import toast from '../../../../components/toast';
+  import imgDialog from '../../../../components/imgDialog';
+import ImgDialog from '../../../../components/imgDialog.vue';
 
   export default {
     name: 'banAccount',
@@ -104,20 +98,16 @@
         riderName: '骑手姓名',
         riderStatus: null,
         keys: ['campusName', 'driverGender', 'driverName', 'driverPhone', 'driverStatus'],
-        show: false,
-        alertText: '',
-        alertType: 'success',
         dialog: false,
         LicenseKeys: ['studentCard', 'schoolCard', 'driverIdcardFront', 'driverIdcardBehind'],
         showLicense: false,
         license: [],
-        showImg: false,
-        imgUrl: '',
         loading: true
       }
     },
     components: {
-      tip
+      toast,
+      imgDialog
     },
     mounted() {
       getRiderInfo({
@@ -149,18 +139,10 @@
             }
           }
         } else {
-          showTip.call(this, res.msg, 'error')
+          this.$refs.toast.setAlert(res.msg, 'error')
         }
         this.loading = false
       })
-    },
-    computed: {
-      tip() {
-        return 'tip'
-      }
-    },
-    watch: {
-      
     },
     methods: {
       openDialog() {
@@ -177,9 +159,9 @@
           if(res.code == H_config.STATECODE_rider_SUCCESS) {
             this.riderStatus = this.riderStatus == 3 ? 1 : 3
             this.$store.commit('updateRiderStatus', this.riderStatus)
-            showTip.call(this, '修改成功')
+            this.$refs.toast.setAlert('修改成功')
           } else {
-            showTip.call(this, '修改失败', 'error')
+            this.$refs.toast.setAlert('修改失败', 'error')
           }
           this.closeDialog()
         })
@@ -208,13 +190,9 @@
             }
             this.showLicense = true
           } else {
-            showTip.call(this, '网络异常', 'error')
+            this.$refs.toast.setAlert('网络异常', 'error')
           }
         })
-      },
-      scaleImg(url) {
-        this.imgUrl = url
-        this.showImg = true
       }
     }
   }

@@ -1,5 +1,7 @@
 <template>
   <div class="checkShop">
+    <img-dialog ref="img"></img-dialog>
+
     <v-data-table
       :headers="headers"
       :items="shopInfo"
@@ -18,12 +20,9 @@
             class="mt-16"
             max-width="100"
             max-height="100"
-            @click="scaleImg(BASE_URL + '/' + shopHead)"
+            @click="$refs.img.scaleImg(BASE_URL + '/' + shopHead)"
             :src="BASE_URL + '/' + shopHead"
           ></v-img>
-          <v-dialog v-model="showImg" max-width="500px">
-            <v-img :src="imgUrl" max-width="500px" max-height="500px"></v-img>
-          </v-dialog>
           <v-spacer></v-spacer>
           <v-btn
             dark
@@ -65,7 +64,7 @@
                     class="my-1"
                     max-width="50"
                     max-height="50"
-                    @click="scaleImg(BASE_URL + '/' + item.commodityPhoto)"
+                    @click="$refs.img.scaleImg(BASE_URL + '/' + item.commodityPhoto)"
                     :src="BASE_URL + '/' + item.commodityPhoto"
                   ></v-img>
                 </template>
@@ -90,7 +89,7 @@
                   max-width="200px" 
                   max-height="200px" 
                   :src="BASE_URL + '/' + item.url"
-                  @click="scaleImg(BASE_URL + '/' + item.url)"></v-img>
+                  @click="$refs.img.scaleImg(BASE_URL + '/' + item.url)"></v-img>
               </div>
             </v-card>
           </v-dialog>
@@ -107,6 +106,8 @@
     shopIdGetShopLicense
   } from '../../../../network/shop';
   import { BASE_URL, H_config } from '../../../../network/config';
+  import imgDialog from '../../../../components/imgDialog';
+import ImgDialog from '../../../../components/imgDialog.vue';
 
   export default {
     name: 'checkShop',
@@ -194,11 +195,12 @@
           }
         ],
         specs: [],
-        imgUrl: '',
-        showImg: false,
         license: [],
         loading: true
       }
+    },
+    components: {
+      imgDialog
     },
     async mounted() {
       await shopIdGetShop({
@@ -235,7 +237,7 @@
             }
           }
         } else {
-          showTip.call(this, '网络异常', 'error')
+          this.$refs.toast.setAlert('网络异常', 'error')
         }
         this.loading = false
       })
@@ -252,7 +254,7 @@
             }
           }
         } else {
-          showTip.call(this, '网络异常', 'error')
+          this.$refs.toast.setAlert('网络异常', 'error')
         }
       })
     },
@@ -291,14 +293,10 @@
               this.license.push(img)
             }
           } else {
-            showTip.call(this, '网络异常', 'error')
+            this.$refs.toast.setAlert(this, '网络异常', 'error')
           }
           this.showLicense = true
         })
-      },
-      scaleImg(url) {
-        this.imgUrl = url
-        this.showImg = true
       }
     }
   }

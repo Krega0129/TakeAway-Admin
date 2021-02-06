@@ -1,12 +1,7 @@
 <template>
   <div class="newShopInfo">
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
-
+    <toast ref="toast"></toast>
+    <img-dialog ref="img"></img-dialog>
     <v-data-table
       :headers="headers"
       :items="shopInfo"
@@ -26,10 +21,6 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-
-        <v-dialog v-model="showImg" max-width="500px">
-          <v-img :src="imgUrl" max-width="500px" max-height="500px"></v-img>
-        </v-dialog>
       </template>
 
       <template v-slot:[`item.infoValue`]="{ item }">
@@ -38,7 +29,7 @@
           class="my-1"
           max-width="100"
           max-height="100"
-          @click="scaleImg(BASE_URL + '/' + item.infoValue)"
+          @click="$refs.img.scaleImg(BASE_URL + '/' + item.infoValue)"
           :src="BASE_URL + '/' + item.infoValue"
         ></v-img>
         <div v-else>{{item.infoValue}}</div>
@@ -73,8 +64,8 @@
 </template>
 
 <script>
-  import tip from '../../../../components/tip';
-  import { showTip, close } from '../../../../utils';
+  import toast from '../../../../components/toast';
+  import imgDialog from '../../../../components/imgDialog';
   import { BASE_URL, H_config } from '../../../../network/config';
   import { reviewNewShop } from '../../../../network/shop'
 
@@ -98,23 +89,14 @@
           },
         ],
         shopInfo: [],
-        alertText: '',
-        alertType: 'success',
-        show: false,
         flag: '',
         BASE_URL: BASE_URL,
         keys: ['campusAddress', 'contactPhone', 'detailAddress', 'shopCategory', 'shopHead', 'shopIntroduce', 'shopName'],
-        imgUrl: '',
-        showImg: false
       }
     },
     components: {
-      tip
-    },
-    computed: {
-      tip() {
-        return 'tip'
-      }
+      toast,
+      imgDialog
     },
     mounted() {
       let shop = this.$store.state.currentShop
@@ -153,19 +135,17 @@
           shopIds: this.$store.state.currentShop.shopId
         }).then(res => {
           if(res.code == H_config.STATECODE_update_SUCCESS) {
-            showTip.call(this, this.flag==''?'审核通过':'审核不通过')
-            close.call(this)
+            this.$refs.toast.setAlert(this.flag==''?'审核通过':'审核不通过')
+            setTimeout(() => {
+              this.$router.go(-1)
+            }, 1000);
           } else {
-            showTip.call(this, '网络异常', 'error')
+            this.$refs.toast.setAlert('网络异常', 'error')
           }
         })
       },
       cancelReview() {
         this.passReview = false
-      },
-      scaleImg(url) {
-        this.imgUrl = url
-        this.showImg = true
       }
     }
   }

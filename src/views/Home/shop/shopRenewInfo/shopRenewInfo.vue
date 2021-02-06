@@ -1,12 +1,7 @@
 <template>
   <div class="shopRenewInfo">
 
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
+    <toast ref="toast"></toast>
 
     <v-data-table
       :headers="headers"
@@ -125,10 +120,8 @@
     reviewDetails,
     auditShopUpdate
   } from '../../../../network/shop'
-
-  import tip from '../../../../components/tip';
-  import { showTip } from '../../../../utils';
-import { H_config } from '../../../../network/config';
+  import toast from '../../../../components/toast';
+  import { H_config } from '../../../../network/config';
 
   export default {
     data () {
@@ -170,24 +163,16 @@ import { H_config } from '../../../../network/config';
         // 点击的数据索引
         editedIndex: -1,
         shopList: [],
-        alertText: '',
-        alertType: 'success',
-        show: false,
         statusSelectVal: '未审核',
         statusSelectIndex: 0,
         loading: true
       }
     },
     components: {
-      tip,
+      toast,
     },
     mounted() {
       this._reviewDetails()
-    },
-    computed: {
-      tip() {
-        return 'tip'
-      }
     },
     watch: {
       selected (val) {
@@ -226,7 +211,7 @@ import { H_config } from '../../../../network/config';
           } else if(res.code === H_config.STATECODE_getNull_FAILED) {
             this.desserts = []
           } else {
-            showTip.call(this, '网络异常', 'error')
+            this.$refs.toast.setAlert('网络异常', 'error')
           }
           this.loading = false
         })
@@ -255,9 +240,9 @@ import { H_config } from '../../../../network/config';
         }).then(res => {
           if(res.code == H_config.STATECODE_review_SUCCESS) {
             this.desserts.splice(this.editedIndex, 1)
-            showTip.call(this, '审核通过')
+            this.$refs.toast.setAlert('审核通过')
           } else {
-            showTip.call(this, '审核失败', 'error')
+            this.$refs.toast.setAlert('审核失败', 'error')
           }
         })
         this.passReview = false

@@ -6,12 +6,7 @@
     style="width: 100%; height: 100vh;"
   >
 
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
+    <toast ref="toast"></toast>
 
     <v-form
       ref="form"
@@ -58,8 +53,7 @@
 </template>
 
 <script>
-  import tip from '../components/tip';
-  import { showTip } from '../utils';
+  import toast from '../components/toast';
 
   export default {
     data() {
@@ -77,19 +71,11 @@
         passwordRules: [
           v => (!!v && v.length >= 5 && v.length <= 16) || '密码长度必须为6-16位',
           v => /^[a-zA-Z0-9_]{5,16}$/.test(v) || '密码含非法字符',
-        ],
-        alertText: '',
-        alertType: 'success',
-        show: false,
+        ]
       }
     },
     components: {
-      tip
-    },
-    computed: {
-      tip() {
-        return 'tip'
-      }
+      toast
     },
     methods: {
       validate () {
@@ -98,10 +84,10 @@
           localStorage.setItem('takeAwayManage_TOKEN', 11)
           localStorage.setItem('account', this.account)
           this.$store.commit('login', this.account)
-          showTip.call(this, '登录成功')
+          this.$refs.toast.setAlert('登录成功')
           this.$router.replace('/admin') 
         } else {
-          showTip.call(this, '账号或密码错误', 'error')
+          this.$refs.toast.setAlert('账号或密码错误', 'error')
         }
       }
     }

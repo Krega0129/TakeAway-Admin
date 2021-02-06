@@ -1,12 +1,7 @@
 <template>
   <div class="shopList">
 
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
+    <toast ref="toast"></toast>
 
     <v-data-table
       :headers="headers"
@@ -149,8 +144,7 @@
     updateTopStatus
   } from '../../../../network/shop';
   import { H_config } from '../../../../network/config';
-  import { showTip, close } from '../../../../utils';
-  import tip from '../../../../components/tip'
+  import toast from '../../../../components/toast'
 
   export default {
     name: 'shopList',
@@ -188,14 +182,11 @@
         selected: [],
         campus: ['全部校区'],
         campusSelectVal: '',
-        show: false,
-        alertText: '',
-        alertType: 'success',
         loading: true
       }
     },
     components: {
-      tip
+      toast
     },
     mounted() {
       getAllCampus().then(res => {
@@ -211,11 +202,6 @@
       campusSelectVal() {
         this.loading = true
         this._getShop()
-      }
-    },
-    computed: {
-      tip() {
-        return 'tip'
       }
     },
     methods: {
@@ -237,7 +223,7 @@
           } else if(res.code == H_config.STATECODE_getNull_FAILED) {
             this.shop = []
           } else {
-            showTip.call(this, '网络异常', 'error')
+            this.$refs.toast.setAlert('网络异常', 'error')
           }
           this.loading = false 
         })
@@ -264,9 +250,9 @@
         }).then(res => {
           if(res.code == H_config.STATECODE_update_SUCCESS) {
             this.shop[this.editIndex].runStatus = this.shop[this.editIndex].runStatus == 2 ? 1 : 2
-            showTip.call(this, '修改成功')
+            this.$refs.toast.setAlert('修改成功')
           } else {
-            showTip.call(this, '修改失败', 'error')
+            this.$refs.toast.setAlert('修改失败', 'error')
           }
         })
         this.editIndex = -1;
@@ -279,9 +265,9 @@
         }).then(res => {
           if(res.code == H_config.STATECODE_update_SUCCESS) {
             this.shop[this.editIndex].topChecked = Number(!this.shop[this.editIndex].topChecked)
-            showTip.call(this, '修改成功')
+            this.$refs.toast.setAlert('修改成功')
           } else {
-            showTip.call(this, '修改失败', 'error')
+            this.$refs.toast.setAlert('修改失败', 'error')
           }
         })
         this.closeDialog()

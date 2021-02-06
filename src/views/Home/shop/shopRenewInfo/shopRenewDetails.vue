@@ -1,11 +1,6 @@
 <template>
   <div class="shopRenewDetails">
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
+    <toast ref="toast"></toast>
 
     <v-data-table
       :headers="headers"
@@ -87,8 +82,7 @@
   } from '../../../../network/shop'
   import { BASE_URL, H_config } from '../../../../network/config';
 
-  import tip from '../../../../components/tip'
-  import { showTip, close } from '../../../../utils';
+  import toast from '../../../../components/toast'
 
   export default {
     name: 'shopRenewDetails',
@@ -120,19 +114,11 @@
         // 可修改的值
         keys: ['campusAddress', 'contactPhone', 'detailAddress', 'shopCategory', 'shopHead', 'shopIntroduce', 'shopName'],
         updateId: null,
-        alertText: '',
-        alertType: 'success',
-        status: null,
-        show: false
+        status: null
       }
     },
     components: {
-      tip,
-    },
-    computed: {
-      tip() {
-        return 'tip'
-      },
+      toast
     },
     mounted() {
       let oldInfo = this.$store.state.shopOldInfo
@@ -175,10 +161,12 @@
           ids: this.updateId
         }).then(res => {
           if(res.code === H_config.STATECODE_review_SUCCESS) {
-            showTip.call(this, '修改成功')
-            close.call(this)
+            this.$refs.toast.setAlert('修改成功')
+            setTimeout(() => {
+              this.$router.go(-1)
+            }, 1000);
           } else {
-            showTip.call(this, '网络异常', 'error')
+            this.$refs.toast.setAlert('网络异常', 'error')
           }
         })
       }

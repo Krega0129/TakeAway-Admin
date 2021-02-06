@@ -1,12 +1,8 @@
 <template>
   <div class="newShop">
 
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
+    <toast ref="toast"></toast>
+    <img-dialog ref="img"></img-dialog>
 
     <v-data-table
       :headers="header"
@@ -93,10 +89,6 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
-
-          <v-dialog v-model="showImg" max-width="500px">
-            <v-img :src="imgUrl" max-width="500px" max-height="500px"></v-img>
-          </v-dialog>
         </v-toolbar>
       </template>
 
@@ -105,7 +97,7 @@
           class="my-1"
           max-width="50"
           max-height="50"
-          @click="scaleImg(BASE_URL + '/' + item.shopHead)"
+          @click="$refs.img.scaleImg(BASE_URL + '/' + item.shopHead)"
           :src="BASE_URL + '/' + item.shopHead"
         ></v-img>
       </template>
@@ -152,12 +144,12 @@
   import {
     getAllCampus
   } from '../../../../network/work'
-  import tip from '../../../../components/tip';
-  import { showTip } from '../../../../utils';
   import { 
     BASE_URL,
     H_config
   } from '../../../../network/config'
+  import toast from '../../../../components/toast.vue';
+  import imgDialog from '../../../../components/imgDialog';
 
   export default {
     name: 'newShop',
@@ -191,9 +183,6 @@
         ],
         shops: [],
         editedIndex: -1,
-        alertText: '',
-        alertType: 'success',
-        show: false,
         BASE_URL: BASE_URL,
         campus: ['全部校区'],
         status: ['未审核', '已通过', '未通过'],
@@ -201,13 +190,12 @@
         selectStatusVal: '未审核',
         campusSelectIndex: 0,
         statusSelectIndex: 0,
-        imgUrl: '',
-        showImg: false,
         loading: true
       }
     },
     components: {
-      tip,
+      toast,
+      imgDialog
     },
     mounted() {
       this._getShop()
@@ -219,7 +207,7 @@
             this.campus.push(campus.campusName)
           }
         } else {
-          showTip.call(this, '网络异常', 'error')
+          this.$refs.toast.setAlert('网络异常', 'error')
         }
       })
     },
@@ -244,11 +232,6 @@
         this._getShop()
       }
     },
-    computed: {
-      tip() {
-        return 'tip'
-      }
-    },
     methods: {
       // 搜索过滤条件
       filterOnlyCapsText (value, search, item) {
@@ -269,7 +252,7 @@
             // this.$store.commit('updateShopList', [])
             this.shops = []
           } else {
-            showTip.call(this, '网络异常', 'error')
+            this.$refs.toast.setAlert('网络异常', 'error')
           }
           this.loading = false
         })
@@ -294,16 +277,16 @@
         }).then(res => {
           if(res.code == H_config.STATECODE_update_SUCCESS) {
             this.shops.splice(this.editedIndex, 1)
-            showTip.call(this, '审核已通过')
+            this.$refs.toast.setAlert('审核已通过')
           } else {
-            showTip.call(this, '审核失败', 'error')
+            this.$refs.toast.setAlert('审核失败', 'error')
           }
         })
       },
       // 取消
       cancelReview () {
         this.passReview = false
-        showTip.call(this, '审核已取消')
+        this.$refs.toast.setAlert('审核已取消')
       },
       // 多选通过
       reviewMultiPass() {
@@ -311,10 +294,6 @@
       },
       reviewMultiOut() {
         console.log('批量淘汰');
-      },
-      scaleImg(url) {
-        this.imgUrl = url 
-        this.showImg = true
       }
     }
   }

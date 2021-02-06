@@ -1,12 +1,7 @@
 <template>
   <div class="searchOrder">
 
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
+    <toast ref="toast"></toast>
 
     <v-data-table
       :headers="headers"
@@ -68,8 +63,7 @@
   import {
     getOrderByOrderNum
   } from '../../../network/work';
-  import tip from '../../../components/tip';
-  import { showTip } from '../../../utils';
+  import toast from '../../../components/toast';
 
   export default {
     name: 'searchOrder',
@@ -107,19 +101,11 @@
         rule: [
           v => /^[0-9]{15,16}$/.test(v) || '订单编号必须为15-16位数字',
         ],
-        show: false,
-        alertText: '',
-        alertType: 'success',
         disable: true,
       }
     },
     components: {
-      tip
-    },
-    computed: {
-      tip() {
-        return 'tip'
-      }
+      toast
     },
     methods: {
       _getOrderByOrderNum() {
@@ -129,11 +115,11 @@
           if(res.code === H_config.STATECODE_getOrderByOrderNum_SUCCESS) {
             this.orders = []
             this.orders.push(res.data)
-            showTip.call(this, '查询成功')
+            this.$refs.toast.setAlert('查询成功')
           } else if(res.code === H_config.STATECODE_getOrderByOrderNum_FAILED) {
-            showTip.call(this, res.msg, 'primary')
+            this.$refs.toast.setAlert(res.msg, 'primary')
           } else {
-            showTip.call(this, '查询失败', 'error')
+            this.$refs.toast.setAlert('查询失败', 'error')
           }
         })
       },

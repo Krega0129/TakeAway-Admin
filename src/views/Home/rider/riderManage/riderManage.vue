@@ -1,12 +1,7 @@
 <template>
   <div class="riderManage">
 
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
+    <toast ref="toast"></toast>
 
     <v-data-table
       :headers="headers"
@@ -117,8 +112,7 @@
     getAllCampus
   } from '../../../../network/work';
   import { H_config} from '../../../../network/config';
-  import tip from '../../../../components/tip';
-  import { showTip } from '../../../../utils'
+  import toast from '../../../../components/toast';
 
 export default {
   name: 'riderManage',
@@ -165,14 +159,11 @@ export default {
       selectCampusVal: '全部校区',
       status: ['全部', '正常', '已封停'],
       selectStatusVal: '全部',
-      show: false,
-      alertText: '',
-      alertType: 'success',
       loading: true
     }
   },
   components: {
-    tip
+    toast
   },
   async mounted() {
     await getAllCampus().then(res => {
@@ -183,11 +174,6 @@ export default {
       }
     })
     this._getAllRiders()
-  },
-  computed: {
-    tip() {
-      return 'tip'
-    }
   },
   watch: {
     '$route'(to, from) {
@@ -248,9 +234,10 @@ export default {
             this.riders.splice(this.editIndex, 1)
           }
           this.closeDialog()
-          showTip.call(this, '修改成功')
+          this.$refs.toast.setAlert('修改成功')
+          
         } else {
-          showTip.call(this, '修改失败', 'error')
+          this.$refs.toast.setAlert('修改失败', 'error')
         }
       })
     }

@@ -25,7 +25,6 @@
       ></v-select>
 
       <v-spacer></v-spacer>
-
       <v-dialog
         ref="dialog"
         v-model="modal"

@@ -1,5 +1,8 @@
 <template>
   <div class="riderVerify">
+
+    <toast ref="toast"></toast>
+
     <v-data-table
       :headers="headers"
       :items="riders"
@@ -144,7 +147,7 @@
     getRiderByStatus,
     updateReviewStatus
   } from '../../../../network/rider'
-  import { showTip } from '../../../../utils';
+  import toast from '../../../../components/toast';
 
   export default {
     name: 'riderVerify',
@@ -187,6 +190,9 @@
         loading: true
       }
     },
+    components: {
+      toast
+    },
     async mounted() {
       await getAllCampus().then(res => {
         if(res.code == H_config.STATECODE_campus_SUCCESS) {
@@ -194,7 +200,7 @@
             this.campus.push(school.campusName)
           }
         } else {
-          showTip.call(this, '网络异常', 'error')
+          this.$refs.toast.setAlert('网络异常', 'error')
         }
       })
 
@@ -233,7 +239,7 @@
           if(res.code === H_config.STATECODE_rider_SUCCESS) {
             this.riders = res.data
           } else {
-            showTip.call(this, '网络异常', 'error')
+            this.$refs.toast.setAlert('网络异常', 'error')
           }
           this.loading = false
         })
@@ -251,9 +257,9 @@
         }).then(res => {
           if(res.code === H_config.STATECODE_rider_SUCCESS) {
             this.riders.splice(this.editIndex, 1)
-            showTip.call(this, '修改成功')
+            this.$refs.toast.setAlert('修改成功')
           } else {
-            showTip.call(this, '修改失败', 'error')
+            this.$refs.toast.setAlert('修改失败', 'error')
           }
           this.closeDialog()
         })

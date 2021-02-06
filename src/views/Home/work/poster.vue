@@ -1,12 +1,7 @@
 <template>
   <div class="poster">
 
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
+    <toast ref="toast"></toast>
 
     <v-toolbar
       dense
@@ -170,8 +165,7 @@
 </template>
 
 <script>
-  import { showTip } from '../../../utils'
-  import tip from '../../../components/tip';
+  import toast from '../../../components/toast';
   import {
     updatePhoto,
     getAllCampus,
@@ -207,15 +201,12 @@
         campusList: [],
         campusSelectVal: '请选择校区',
         campusSelectIndex: 0,
-        show: false,
-        alertText: '',
-        alertType: 'success',
         deletePoster: false,
         loading: true
       }
     },
     components: {
-      tip
+      toast
     },
     async mounted() {
       await getAllCampus().then(res => {
@@ -227,14 +218,9 @@
             this.campus.push(school.campusName)
           }
         } else {
-          showTip.call(this, '网络异常', 'error')
+          this.$refs.toast.setAlert('网络异常', 'error')
         }
       })
-    },
-    computed: {
-      tip() {
-        return 'tip'
-      }
     },
     watch: {
       campusSelectVal(val) {
@@ -256,7 +242,7 @@
           } else if(res.code == H_config.STATECODE_getNull_FAILED) {
             this.posterURL = []
           } else {
-            showTip.call(this, '网络异常', 'error')
+            this.$refs.toast.setAlert('网络异常', 'error')
           }
           this.loading = false
         })
@@ -269,9 +255,9 @@
           if(res.code === H_config.STATECODE_updatePhoto_SUCCESS) {
             this.cancelUpload()
             this._getAllPosters()
-            showTip.call(this, '上传成功')
+            this.$refs.toast.setAlert('上传成功')
           } else {
-            showTip.call(this, '上传失败', 'error')
+            this.$refs.toast.setAlert('上传失败', 'error')
           }
         })
       },
@@ -288,9 +274,9 @@
             photoId: this.posterURL[this.selected[i]].photoId
           }).then(res => {
             if(res.code === H_config.STATECODE_deletePhoto_SUCCESS) {
-              showTip.call(this, '删除成功')
+              this.$refs.toast.setAlert('删除成功')
             } else {
-              showTip.call(this, '删除失败', 'error')
+              this.$refs.toast.setAlert('删除失败', 'error')
             }
           })
         }

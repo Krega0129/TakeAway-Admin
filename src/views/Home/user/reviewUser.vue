@@ -1,5 +1,7 @@
 <template>
   <div class="reviewUser">
+    <img-dialog ref="img"></img-dialog>
+
     <v-card
       class="d-flex pa-5"
       flat
@@ -36,6 +38,7 @@
           max-height="200"
           class="mt-5"
           src="https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg"
+          @click="$refs.img.scaleImg(BASE_URL + '/' + '')"
         ></v-img>
       </v-card>
     </v-card>
@@ -59,6 +62,7 @@
 </template>
 
 <script>
+import imgDialog from '../../../components/imgDialog'
   export default {
     name: 'reviewUser',
     data() {
@@ -75,6 +79,9 @@
           }
         ]
       }
+    },
+    components: {
+      imgDialog
     },
     methods: {
 

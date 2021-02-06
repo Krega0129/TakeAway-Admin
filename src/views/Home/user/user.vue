@@ -1,5 +1,7 @@
 <template>
   <div class="user">
+    <img-dialog ref="img"></img-dialog>
+
     <v-data-table
       :headers="headers"
       :items="users"
@@ -83,6 +85,7 @@
   import {
     getAllShareSchool
   } from '../../../network/user';
+  import imgDialog from '../../../components/imgDialog';
 
   export default {
     name: 'user',
@@ -146,6 +149,9 @@
         singleSelect: false,
         selected: []
       }
+    },
+    components: {
+      imgDialog
     },
     mounted() {
       this._getAllShareSchool()

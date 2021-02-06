@@ -1,12 +1,7 @@
 <template>
   <div class="campus">
 
-    <component
-      :is="tip"
-      :alertText="alertText"
-      :alertType="alertType"
-      :showTip="show"
-    ></component>
+    <toast ref="toast"></toast>
 
     <v-data-table
       :headers="headers"
@@ -152,8 +147,7 @@
   import {
     H_config
   } from '../../../network/config'
-  import tip from '../../../components/tip';
-  import { showTip } from '../../../utils'
+  import toast from '../../../components/toast';
 
   export default {
     name: 'campus',
@@ -207,14 +201,11 @@
           campusCost: 0,
           campusStatus: 1
         },
-        show: false,
-        alertText: '',
-        alertType: 'success',
         loading: true
       }
     },
     components: {
-      tip
+      toast
     },
     mounted() {
       this._getAllCampus()
@@ -235,7 +226,7 @@
               this.campus.push(campus)
             }
           } else {
-            showTip.call(this, '网络异常', 'error')
+            this.$refs.toast.setAlert('网络异常', 'error')
           }
           this.loading = false
         })
@@ -260,9 +251,9 @@
         }).then(res => {
           if(res.code == H_config.STATECODE_campus_SUCCESS) {
             this.campus.splice(this.editedIndex, 1)
-            showTip.call(this, '删除成功')
+            this.$refs.toast.setAlert('删除成功')
           } else {
-            showTip.call(this, '删除失败', 'error')
+            this.$refs.toast.setAlert('删除失败', 'error')
           }
         })
         this.editedIndex = -1;
@@ -281,20 +272,20 @@
           await updateCampusInfo(JSON.stringify(this.editedItem)).then(res => {
             if(res.code == H_config.STATECODE_campus_SUCCESS) {
               Object.assign(this.campus[this.editedIndex], this.editedItem)
-              showTip.call(this, '修改成功')
+              this.$refs.toast.setAlert('修改成功')
             } else {
-              showTip.call(this, '修改失败', 'error')
+              this.$refs.toast.setAlert('修改失败', 'error')
             }
           })
         } else {
           await addCampus(JSON.stringify(this.editedItem)).then(res => {
             if(res.code == H_config.STATECODE_campus_SUCCESS) {
               this.campus.push(this.editedItem)
-              showTip.call(this, '新增成功')
+              this.$refs.toast.setAlert('新增成功')
               // 需要重新获取 得到 campusId 才能进行删除操作
               this._getAllCampus()
             } else {
-              showTip.call(this, '新增失败', 'error')
+              this.$refs.toast.setAlert('新增失败', 'error')
             }
           })
         }
@@ -304,9 +295,6 @@
     computed: {
       formTitle () {
         return this.editedIndex === -1 ? '新增校区' : '编辑校区'
-      },
-      tip() {
-        return 'tip'
       }
     },
     watch: {

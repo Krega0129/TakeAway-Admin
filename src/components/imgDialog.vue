@@ -1,35 +1,22 @@
 <template>
-  <v-dialog v-model="showImg" max-width="500px">
+  <v-dialog v-model="show" max-width="500px">
     <v-img :src="imgUrl" max-width="500px" max-height="500px"></v-img>
   </v-dialog>
 </template>
 
 <script>
   export default {
-    name: 'imgDialog',
-    props: {
-      imgUrl: {
-        type: String,
-        require
-      },
-      showImg: {
-        type: Boolean,
-        default: false
-      }
-    },
     data() {
       return {
+        imgUrl: '',
         show: false
       }
     },
-    watch: {
-      showImg(val, oldVal) {
-        console.log(val);
-        console.log(oldVal);
-      }
-    },
     methods: {
-      
+      scaleImg(url) {
+        this.imgUrl = url
+        this.show = true
+      }
     }
   }
 </script>

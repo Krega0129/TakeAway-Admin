@@ -1,5 +1,9 @@
 <template>
   <div class="riderDetails">
+
+    <toast ref="toast"></toast>
+    <img-dialog ref="img"></img-dialog>
+    
     <v-data-table
       :headers="headers"
       :items="riderInfo"
@@ -25,9 +29,6 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
-          <v-dialog v-model="showImg" max-width="500px">
-            <v-img :src="imgUrl"></v-img>
-          </v-dialog>
         </v-toolbar>
       </template>
 
@@ -36,7 +37,7 @@
           class="my-1"
           max-width="80"
           max-height="80"
-          @click="scaleImg(BASE_URL + '/' + item.infoValue)"
+          @click="$refs.img.scaleImg(BASE_URL + '/' + item.infoValue)"
           :src="BASE_URL + '/' + item.infoValue"
         ></v-img>
       </template>
@@ -75,7 +76,8 @@ import {
   selectById
 } from '../../../../network/rider';
 import { H_config, BASE_URL } from '../../../../network/config';
-import { showTip, close } from '../../../../utils';
+import toast from '../../../../components/toast';
+import imgDialog from '../../../../components/imgDialog';
 
 export default {
   name: 'riderDetails',
@@ -96,13 +98,15 @@ export default {
           value: 'infoValue',
         }
       ],
+      components: {
+        toast,
+        imgDialog
+      },
       riderInfo: [],
       riderName: '骑手姓名',
       dialog: false,
       status: this.$store.state.riderStatus,
       keys: ['schoolCard', 'studentCard', 'driverIdcardFront', 'driverIdcardBehind'],
-      imgUrl: '',
-      showImg: false,
       loading: true
     }
   },
@@ -138,11 +142,13 @@ export default {
         if(res.code == H_config.STATECODE_rider_SUCCESS) {
           this.state = this.status == 3 ? 1 : 3
           this.$store.commit('updateRiderStatus', this.status)
-          showTip.call(this, '修改成功')
+          this.$refs.toast.setAlert('修改成功')
           this.$bus.$emit('changeRiderReviewStatus', this.$store.state.riderId)
-          close.call(this)
+          setTimeout(() => {
+            this.$router.go(-1)
+          }, 1000);
         } else {
-          showTip.call(this, '修改失败', 'error')
+          this.$refs.toast.setAlert('修改失败', 'error')
         }
         this.closeDialog()
       })
@@ -161,10 +167,6 @@ export default {
     // },
     closeDialog() {
       this.dialog = false
-    },
-    scaleImg(url) {
-      this.imgUrl = url
-      this.showImg = true
     }
   }
 }
