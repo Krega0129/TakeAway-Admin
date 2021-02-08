@@ -140,25 +140,28 @@
     
     <div v-if="loading" class="grey--text text-center mt-16">加载中...请稍等</div>
 
-    <v-carousel
-      class="mx-auto mt-3"
-      cycle
-      style="width: 70vw"
+    <div
+      class="mx-auto mt-3 swiper pa-2"
       v-else-if="posterURL[0]"
-      hide-delimiter-background
-      show-arrows-on-hover
+      style="width: 70vw;"
     >
-      <v-carousel-item
-        v-for="item in posterURL"
-        :key="item.photoId"
+      <v-carousel
+        cycle
+        hide-delimiter-background
+        show-arrows-on-hover
       >
-        <v-img
-          :aspect-ratio="16/9"
-          style="height: 100%"
-          :src="BASE_URL + '/' + item.photo"
-        ></v-img>
-      </v-carousel-item>
-    </v-carousel>
+        <v-carousel-item
+          v-for="item in posterURL"
+          :key="item.photoId"
+        >
+          <v-img
+            :aspect-ratio="16/9"
+            style="height: 100%"
+            :src="BASE_URL + '/' + item.photo"
+          ></v-img>
+        </v-carousel-item>
+      </v-carousel>
+    </div>
 
     <div v-else class="text-center red--text mt-16">该校区还没设置海报</div>
   </div>  
@@ -301,5 +304,9 @@
         height: 70vh
       }
     }
+  }
+
+  .swiper {
+    box-shadow: 3px 3px 10px rgba(100,100,100,.5), -3px -3px 10px #fff;
   }
 </style>

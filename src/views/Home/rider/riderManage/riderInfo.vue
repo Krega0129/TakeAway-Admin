@@ -73,7 +73,6 @@
   } from '../../../../network/rider';
   import toast from '../../../../components/toast';
   import imgDialog from '../../../../components/imgDialog';
-import ImgDialog from '../../../../components/imgDialog.vue';
 
   export default {
     name: 'banAccount',

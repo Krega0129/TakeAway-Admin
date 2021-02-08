@@ -66,11 +66,45 @@
         </v-date-picker>
       </v-dialog>
     </v-toolbar>
-    <div class="echart d-inline-block" ref="echartA" style="width: 55vw; height: 60vh;"></div>
+    <v-row>
+      <v-col cols="8">
+        <div class="echart d-inline-block" ref="echartA" style="width: 100%; height: 60vh;"></div>
+      </v-col>
+      <v-col cols="3">
+        <v-card style="min-height: 50vh">
+          <v-card-title class="font-weight-bold">今日收入：</v-card-title>
+          <div class="font-weight-bold text-h4 text-center red--text my-5">￥100</div>
+          <v-card-text class="mt-15">
+            <span class="text-subtitle-1 font-weight-bold">设置抽成比：</span>
+            <v-text-field
+              dense
+              reverse
+              class="d-inline-block"
+              style="width: 40%"
+            ></v-text-field>
+            <span class="text-h6"> %</span>
+            <v-btn
+              color="primary"
+              dense
+              block
+            >
+              确定
+            </v-btn>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
     <v-divider 
       vertical 
     ></v-divider>
-    <div class="echart d-inline-block" ref="echartB" style="width: 20vw; height: 60vh; margin-left: 7vw"></div>
+    <!-- <div class="echart d-inline-block" ref="echartB" style="width: 20vw; height: 60vh; margin-left: 7vw"></div> -->
+    
+    <!-- <div
+      class="d-inline-block"
+      style="width: 20vw; height: 60vh; margin-left: 0vw; vertical-align: top"
+    >
+      
+    </div> -->
   </div>
 </template>
 
@@ -110,11 +144,11 @@
     methods: {
       renewCharts() {
         let myChartA = echarts.init(this.$refs.echartA);
-        let myChartB = echarts.init(this.$refs.echartB);
+        // let myChartB = echarts.init(this.$refs.echartB);
         let optionA = {
-          title: {
-            text: '盈利'
-          },
+          // title: {
+          //   text: '盈利'
+          // },
           tooltip: {},
           legend: {
             data:['盈利']
@@ -129,26 +163,26 @@
             data: [5, 20, 36, 10, 10, 20, 12]
           }]
         };
-        let optionB = {
-          title: {
-            text: '今日收入'
-          },
-          width: 150,
-          tooltip: {},
-          xAxis: {
-            data: ["今日收入"]
-          },
-          yAxis: {},
-          series: [{
-            name: '今日收入',
-            type: 'bar',
-            data: [65]
-          }]
-        };
+        // let optionB = {
+        //   title: {
+        //     text: '今日收入'
+        //   },
+        //   width: 150,
+        //   tooltip: {},
+        //   xAxis: {
+        //     data: ["今日收入"]
+        //   },
+        //   yAxis: {},
+        //   series: [{
+        //     name: '今日收入',
+        //     type: 'bar',
+        //     data: [65]
+        //   }]
+        // };
 
         // 使用刚指定的配置项和数据显示图表。
         myChartA.setOption(optionA);
-        myChartB.setOption(optionB);
+        // myChartB.setOption(optionB);
       }
     }
   }
