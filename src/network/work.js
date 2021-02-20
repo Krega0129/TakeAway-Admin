@@ -97,3 +97,37 @@ export function getOrderByOrderNum(data) {
     }
   })
 }
+
+// 获取当前抽成比
+export function getNewestTakePercentage() {
+  return axios({
+    method: 'post',
+    url: H_config.API_getNewestTakePercentage_URL,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+// 设置抽成比
+export function setTakePercentage(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_setTakePercentage_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+// 获取抽成修改记录
+export function getProfitHistory() {
+  return axios({
+    method: 'post',
+    url: H_config.API_getProfitHistory_URL,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}

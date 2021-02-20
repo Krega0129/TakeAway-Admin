@@ -10,18 +10,18 @@ export default new Vuex.Store({
 
     // shopList: [],
     currentShop: {},
-    currentShopIndex: -1,
     shopReviewStatus: 0,
     shopId: -1,
     shopOldInfo: {},
     shopNewInfo: {},
 
-    rider: {},
     riderStatus: -1,
     riderId: -1,
     // riderIndex: -1,
 
-    order: {}
+    order: {},
+
+    shareCampus: {}
   },
   mutations: {
     login(state, payload) {
@@ -55,6 +55,9 @@ export default new Vuex.Store({
     },
     updateOrder(state, payload) {
       state.order = payload
+    },
+    updateShareCampus(state, payload) {
+      state.shareCampus = payload
     }
   },
   actions: {

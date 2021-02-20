@@ -30,6 +30,13 @@ H_config.STATECODE_selectPhotos_NULL_FAILED = 1500   // 参数为空（删除图
 H_config.API_getOrderByOrderNum_URL = '/order/selectAllOrderInfo'
 H_config.STATECODE_getOrderByOrderNum_SUCCESS = 3208
 H_config.STATECODE_getOrderByOrderNum_FAILED = 3555
+// 获取当前抽成比
+H_config.API_getNewestTakePercentage_URL = '/profit/selectNewest'
+// 设置抽成比
+H_config.API_setTakePercentage_URL = '/profit/insert'
+H_config.STATECODE_takePercentage_SUCCESS = 3200
+// 获取抽成修改记录
+H_config.API_getProfitHistory_URL = '/profit/selectAll'
 
 // 店铺
 H_config.STATECODE_get_SUCCESS = 1200 // 查询成功
@@ -69,13 +76,13 @@ H_config.API_deleteRiderInfo_URL = '/driverinfo/delete'
 
 // 分享校园
 H_config.API_checkUserHistory_URL = '/shareschool/selectByUid'
-H_config.STATECODE_checkUserHistory_SUCCESSSTATUS = 2217
+H_config.STATECODE_checkUserHistory_SUCCESS = 2217
 H_config.API_getAllShareSchool_URL = '/shareschool/selectAll'
-H_config.STATECODE_getAllShareSchool_SUCCESSSTATUS = 2222
-H_config.API_getShareSchoolByStatus_URL = '/shareschool/selectByStatus'
-H_config.STATECODE_getShareSchoolByStatus_SUCCESSSTATUS = 2218
+H_config.STATECODE_getAllShareSchool_SUCCESS = 2222
+H_config.API_getShareSchoolByStatus_URL = '/shareschool/selective'
+H_config.STATECODE_getShareSchoolByStatus_SUCCESS = 3200
 H_config.API_updateShareSchoolStatus_URL = '/shareschool/updateStatus'
-H_config.STATECODE_updateShareSchoolStatus_SUCCESSSTATUS = 2220
+H_config.STATECODE_updateShareSchoolStatus_SUCCESS = 2220
 
 
 H_config.API_test_URL = '/modifyShopInfo/updatePhoto'

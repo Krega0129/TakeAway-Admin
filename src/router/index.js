@@ -22,8 +22,10 @@ const RiderDetails = () => import('@/views/Home/rider/riderVerify/riderDetails')
 const RiderManage = () => import('@/views/Home/rider/riderManage/riderManage')
 const RiderInfo = () => import('@/views/Home/rider/riderManage/riderInfo');
 
-const User = () => import('@/views/Home/user/user');
-const ReviewUser = () => import('@/views/Home/user/reviewUser')
+const User = () => import('@/views/Home/user/shareCampus/user');
+const ReviewUser = () => import('@/views/Home/user/shareCampus/reviewUser')
+const Express = () => import('@/views/Home/user/express/express')
+const ExpressDetails = () => ('@//views/Home/user/express/expressDetails')
 
 Vue.use(VueRouter)
 
@@ -104,7 +106,7 @@ const adminRoute = [
   {
     path: 'shopList',
     meta: {
-      title: '查看信息'
+      title: '店铺列表'
     },
     component: ShopList,
     children: [
@@ -150,18 +152,34 @@ const adminRoute = [
     ]
   },
   {
-    path: 'user',
+    path: 'shareCampus',
     meta: {
       title: '分享校园'
     },
     component: User,
     children: [
       {
-        path: 'reviewUser',
+        path: 'reviewShareCampus',
         meta: {
           title: '分享校园审核'
         },
         component: ReviewUser
+      }
+    ]
+  },
+  {
+    path: 'express',
+    meta: {
+      title: '快递查询'
+    },
+    component: Express,
+    children: [
+      {
+        path: 'expressDetails',
+        meta: {
+          title: '快递详情'
+        },
+        component: ExpressDetails
       }
     ]
   }

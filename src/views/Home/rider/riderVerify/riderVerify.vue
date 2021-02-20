@@ -52,7 +52,7 @@
 
           <v-spacer></v-spacer>
 
-          <v-btn
+          <!-- <v-btn
             dark
             class="ma-2"
             @click="multiSelect = !multiSelect"
@@ -74,7 +74,7 @@
             @click="reviewMultiOut"
           >
             批量淘汰
-          </v-btn>
+          </v-btn> -->
 
           <v-dialog v-model="reviewRider" max-width="500px">
             <v-card>

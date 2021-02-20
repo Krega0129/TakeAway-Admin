@@ -1,6 +1,6 @@
 <template>
   <v-dialog v-model="show" max-width="500px">
-    <v-img :src="imgUrl" max-width="500px" max-height="500px"></v-img>
+    <v-img :src="imgUrl" ></v-img>
   </v-dialog>
 </template>
 

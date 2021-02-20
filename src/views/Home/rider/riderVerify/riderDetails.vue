@@ -98,10 +98,6 @@ export default {
           value: 'infoValue',
         }
       ],
-      components: {
-        toast,
-        imgDialog
-      },
       riderInfo: [],
       riderName: '骑手姓名',
       dialog: false,
@@ -109,6 +105,10 @@ export default {
       keys: ['schoolCard', 'studentCard', 'driverIdcardFront', 'driverIdcardBehind'],
       loading: true
     }
+  },
+  components: {
+    toast,
+    imgDialog
   },
   mounted() {
     selectById({

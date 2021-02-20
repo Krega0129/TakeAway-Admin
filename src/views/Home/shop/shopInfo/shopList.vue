@@ -17,7 +17,7 @@
       v-model="selected"
       :loading="loading"
       loading-text="加载中...请稍后"
-      v-if="this.$route.meta.title === '查看信息'"
+      v-if="this.$route.meta.title === '店铺列表'"
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -43,7 +43,7 @@
 
           <v-spacer></v-spacer>
 
-          <v-btn
+          <!-- <v-btn
             dark
             class="ma-2"
             @click="multiSelect = !multiSelect"
@@ -65,7 +65,7 @@
             @click="openShop"
           >
             解封店铺
-          </v-btn>
+          </v-btn> -->
 
           <v-dialog v-model="dialog" max-width="500px">
             <v-card>

@@ -152,6 +152,7 @@ export default {
         }
       ],
       riders: [],
+      riderStatus: '',
       dialog: false,
       search: '',
       editIndex: -1,
@@ -177,10 +178,9 @@ export default {
   },
   watch: {
     '$route'(to, from) {
-      if(to.fullPath == '/admin/riderManage' && from.fullPath == '/admin/riderManage/riderInfo' && this.riderStatus != this.$store.state.riderStatus) {
+      if(to.fullPath === '/admin/riderManage' && from.fullPath === '/admin/riderManage/riderInfo' && this.riderStatus != this.$store.state.riderStatus) {
         this.riders[this.editIndex].driverStatus = this.$store.state.riderStatus
       }
-      
     },
     selectCampusVal() {
       this.loading = true
@@ -218,9 +218,10 @@ export default {
       })
     },
     riderDetails(item) {
+      this.riderStatus = item.driverStatus
       this.editIndex = this.riders.indexOf(item)
       this.$store.commit('updateRiderId', item.driverId)
-      this.$store.commit('updateRiderStatus', this.riderStatus)
+      this.$store.commit('updateRiderStatus', item.driverStatus)
       this.$router.push('riderManage/riderInfo')
     },
     updateBanStatus() {

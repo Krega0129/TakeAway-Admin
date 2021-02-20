@@ -40,9 +40,9 @@
       {{title}}
       <!-- 图标分界 -->
       
-      <v-btn icon>
+      <!-- <v-btn icon>
         <v-icon>mdi-autorenew</v-icon>
-      </v-btn>
+      </v-btn> -->
 
       <v-spacer></v-spacer>
 
@@ -135,8 +135,8 @@
                 route: '/admin/shopRenewInfo'
               },
               {
-                action: '查看信息',
-                title: '查看信息',
+                action: '店铺列表',
+                title: '店铺列表',
                 route: '/admin/shopList'
               }
             ]
@@ -158,9 +158,20 @@
             ]
           },
           {
-            action: '分享校园',
-            title: '分享校园',
-            route: '/admin/user'
+            action: '用户管理',
+            title: '用户管理',
+            items: [
+              {
+                action: '分享校园',
+                title: '分享校园',
+                route: '/admin/shareCampus'
+              },
+              {
+                action: '快递查询',
+                title: '快递查询',
+                route: '/admin/express'
+              }
+            ]
           }
         ],
         title: '资金管理',
