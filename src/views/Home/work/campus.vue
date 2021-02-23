@@ -65,6 +65,11 @@
                         :rules="rules"
                         label="配送费"
                       ></v-text-field>
+                      <v-text-field
+                        v-model="editedItem.campusMinPrice"
+                        :rules="minPriceRules"
+                        label="起送费"
+                      ></v-text-field>
                   </v-container>
                 </v-card-text>
 
@@ -116,7 +121,7 @@
         >
           mdi-pencil
         </v-icon>
-          编辑校区名
+          编辑校区
         </v-btn>
         <v-btn 
           small
@@ -167,10 +172,10 @@
             value: 'campusCost'
           },
           {
-            text: '商家数量',
+            text: '起送费',
             align: 'start',
             sortable: true,
-            value: 'shopNum'
+            value: 'campusMinPrice'
           },
           {
             text: '详情',
@@ -187,6 +192,9 @@
         campusNameRule: [
           v => !!v || '校区名不能为空'
         ],
+        minPriceRules: [
+          v => (/^[0-9]+([.]\d{1,2})?$/.test(v) || !v) || '必须为数字且最多包含两位小数'
+        ],
         valid: true,
         campus: [],
         selected: [],
@@ -199,6 +207,7 @@
         editedItem: {
           campusName: '',
           campusCost: 0,
+          campusMinPrice: 0,
           campusStatus: 1
         },
         loading: true
@@ -234,6 +243,7 @@
       editCampus(item) {
         this.editedIndex = this.campus.indexOf(item),
         this.editedItem.campusCost = Number(item.campusCost).toFixed(2)
+        this.editedItem.campusMinPrice = Number(item.campusMinPrice).toFixed(2)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
