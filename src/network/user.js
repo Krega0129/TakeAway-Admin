@@ -26,3 +26,30 @@ export function updateShareSchoolStatus(data) {
     }
   })
 }
+
+// 设置快递规格
+export function getExpressSpec() {
+  return axios({
+    url: H_config.API_getExpressSpec_URL, 
+  })
+}
+
+// 设置快递规格
+export function setExpressSpec(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_setExpressSpec_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+}
+
+// 删除快递规格
+export function deleteExpressSpec(data) {
+  return axios({
+    url: H_config.API_deleteSpec_URL, 
+    params: data,
+  })
+}

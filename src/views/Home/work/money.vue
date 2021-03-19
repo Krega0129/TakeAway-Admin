@@ -13,6 +13,7 @@
 
       <v-select
         :items="time"
+        v-model="profitSelectValue"
         label="七天内"
         dense
         solo
@@ -54,7 +55,7 @@
           <v-btn
             text
             color="primary"
-            @click="$refs.dialog.save(date)"
+            @click="$refs.dialog.save(date);_getDayProfit(date)"
           >
             确定
           </v-btn>
@@ -145,12 +146,14 @@
         <div class="echart d-inline-block" ref="echartA" style="width: 90%; height: 60vh;"></div>
       </v-col>
       <v-col cols="3">
-        <v-card style="min-height: 50vh">
+        <v-card style="min-height: 36vh">
           <v-card-title class="font-weight-bold">今日收入：</v-card-title>
-          <div class="font-weight-bold text-h4 text-center red--text my-5">￥100</div>
-          <v-card-text class="mt-15 text-center">
+          <div class="font-weight-bold text-h3 text-center red--text my-5">￥{{profit}}</div>
+          <v-card-text class="mt-15 pl-10 text-left">
             <div class="text-subtitle-1 font-weight-bold">商家抽成比：{{shopTakePercentage}} %</div>
             <div class="text-subtitle-1 font-weight-bold">骑手抽成比：{{riderTakePercentage}} %</div>
+          </v-card-text>
+          <v-card-actions class="px-10">
             <v-btn
               color="primary"
               dense
@@ -159,21 +162,13 @@
             >
               修改
             </v-btn>
-          </v-card-text>
+          </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
     <v-divider 
       vertical 
     ></v-divider>
-    <!-- <div class="echart d-inline-block" ref="echartB" style="width: 20vw; height: 60vh; margin-left: 7vw"></div> -->
-    
-    <!-- <div
-      class="d-inline-block"
-      style="width: 20vw; height: 60vh; margin-left: 0vw; vertical-align: top"
-    >
-      
-    </div> -->
   </div>
 </template>
 
@@ -182,7 +177,11 @@
   import {
     getNewestTakePercentage,
     setTakePercentage,
-    getProfitHistory
+    getProfitHistory,
+    getWeeksProfit,
+    getMonthsProfit,
+    getYearsProfit,
+    getDayProfit
   } from '../../../network/work'
   import { H_config } from '../../../network/config';
   import toast from '../../../components/toast';
@@ -191,7 +190,7 @@
     data() {
       return {
         setTakePercentage: false,
-        time: ['七天内', '一个月', '一年内', '总计'],
+        time: ['7天内', '30天内', '一年内'],
         shopTakePercentage: '',
         riderTakePercentage: '',
         newShopTakePercentage: '',
@@ -232,7 +231,10 @@
             value: 'updateTime'
           }
         ],
-        records: []
+        records: [],
+        profitSelectValue: '七天内',
+        profitSelectIndex: 0,
+        profit: 0.00
       }
     },
     components: {
@@ -246,10 +248,12 @@
         }
       })
       this.renewCharts()
+      this._getDayProfit(this.date)
     },
     watch: {
-      date(val) {
-        console.log(val);
+      profitSelectValue(val) {
+        this.profitSelectIndex = this.time.indexOf(val)
+        this.renewCharts()
       },
       shopTakePercentage(val) {
         this.newShopTakePercentage = val
@@ -259,21 +263,76 @@
       }
     },
     methods: {
-      renewCharts() {
+      async renewCharts() {
+        let x = []
+        let xValue = []
+        let profit = []
+        if(this.profitSelectIndex === 0) {
+          xValue = ['周一','周二', '周三', '周四', '周五', '周六', '周日']
+          for(let i = 0; i < 7; i++) {
+            x.push(xValue[(new Date().getDay() + i) % 7])
+          }
+          
+          await getWeeksProfit({
+            date: this.maxDate
+          }).then(res => {
+            if(res.code === H_config.STATECODE_getProfit_SUCCESS) {
+              profit = res.data.map(item => {
+                return item === null ? 0 : item
+              })
+            } else {
+              this.$refs.toast.setAlert('加载失败', 'error')
+            }
+          })
+
+        } else if (this.profitSelectIndex === 1) {
+          x = ['第一周','第二周', '第三周', '第四周', '两天内']
+          
+          await getMonthsProfit({
+            date: this.maxDate
+          }).then(res => {
+            if(res.code === H_config.STATECODE_getProfit_SUCCESS) {
+              profit = res.data.map(item => {
+                return item === null ? 0 : Number(item).toFixed(2)
+              })
+            } else {
+              this.$refs.toast.setAlert('加载失败', 'error')
+            }
+          })
+        } else {
+          xValue = ['1月','2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+          for(let i = 0; i < 12; i++) {
+            x.push(xValue[(new Date().getMonth() + i + 1) % 12])
+          }
+
+          await getYearsProfit({
+            date: this.maxDate
+          }).then(res => {
+            if(res.code === H_config.STATECODE_getProfit_SUCCESS) {
+              profit = res.data.map(item => {
+                return item === null ? 0 : Number(item).toFixed(2)
+              })
+            } else {
+              this.$refs.toast.setAlert('加载失败', 'error')
+            }
+          })
+        }
+
         let myChartA = echarts.init(this.$refs.echartA);
+        console.log(profit);
         let optionA = {
           tooltip: {},
           legend: {
             data:['盈利']
           },
           xAxis: {
-            data: ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+            data: x
           },
           yAxis: {},
           series: [{
             name: '盈利',
             type: 'bar',
-            data: [5, 20, 36, 10, 10, 20, 12]
+            data: profit
           }]
         };
 
@@ -305,6 +364,18 @@
             this.records = res.data
           } else {
             
+          }
+        })
+      },
+      _getDayProfit(date) {
+        getDayProfit({
+          date: date
+        }).then(res => {
+          if(res.code === H_config.STATECODE_getProfit_SUCCESS) {
+            this.profit = res.data === null ? 0.00 : Number(res.data).toFixed(2)
+            console.log(this.profit);
+          } else {
+            this.$refs.toast.setAlert('加载失败', 'error')
           }
         })
       }

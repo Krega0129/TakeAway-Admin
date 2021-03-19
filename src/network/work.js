@@ -131,3 +131,51 @@ export function getProfitHistory() {
     }
   })
 }
+
+// 查询一星期内收益
+export function getWeeksProfit(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_getWeeksProfit_URL,
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+// 查询一个月内收益
+export function getMonthsProfit(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_getMonthsProfit_URL,
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+// 查询一年内收益
+export function getYearsProfit(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_getYearsProfit_URL,
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+// 查询某一天收益
+export function getDayProfit(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_getDayProfit_URL,
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}

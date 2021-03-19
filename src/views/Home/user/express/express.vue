@@ -28,13 +28,113 @@
             <v-btn
               color="primary"
               class="ml-5 mt-6"
-              @click="_getOrderByOrderNum"
+              @click=""
               :disabled="!disable"
             >
               搜索
             </v-btn>
           </v-form>
           <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            @click="getSpec"
+          >
+            管理规格
+          </v-btn>
+
+          <v-dialog
+            max-width="600"
+            v-model="specDialog"
+          >
+            <v-card>
+              <v-data-table
+                :headers="specHeaders"
+                :items="specs"
+                class="elevation-1"
+                no-data-text="没有数据"
+                hide-default-footer
+                item-key="shopName"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat>
+                    <v-toolbar-title>
+                      规格列表
+                    </v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="primary"
+                      @click="dialog = true"
+                    >
+                      新增规格
+                    </v-btn>
+                  </v-toolbar>
+                </template>
+
+                <template v-slot:[`item.actions`]="{ item }">
+                  <v-icon @click="deleteSpec(item)">
+                    mdi-delete
+                  </v-icon>
+                </template>
+              </v-data-table>
+            </v-card>
+          </v-dialog>
+
+          <v-dialog
+            max-width="300"
+            v-model="dialog"
+          >
+            <v-card>
+              <v-form
+                v-model="valid"
+              >
+                <v-card-text>
+                  <v-container>
+                      <v-text-field
+                        v-model="specName"
+                        label="规格名称"
+                        :rules="nameRules"
+                      ></v-text-field>
+                      <v-text-field
+                        v-model="specPrice"
+                        :rules="priceRules"
+                        label="价格"
+                      ></v-text-field>
+                  </v-container>
+                </v-card-text>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    color="blue darken-1"
+                    text
+                    @click="dialog = false"
+                  >
+                    取消
+                  </v-btn>
+                  <v-btn
+                    color="blue darken-1"
+                    text
+                    :disabled="!valid"
+                    @click="save"
+                  >
+                    保存
+                  </v-btn>
+                </v-card-actions>
+              </v-form>
+            </v-card>
+          </v-dialog>
+
+          <v-dialog v-model="isDeleteSpec" max-width="500px">
+            <v-card>
+              <v-card-title class="headline">确定删除该规格?</v-card-title>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="isDeleteSpec = false">取消</v-btn>
+                <v-btn color="red" text @click="confirmDelete">确定</v-btn>
+                <v-spacer></v-spacer>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-toolbar>
       </template>
       
@@ -43,7 +143,7 @@
           small
           dark
           class="mx-2"
-          @click="checkOrderDetails(item)">
+          @click="">
         <v-icon
           small
           class="mr-2"
@@ -61,8 +161,10 @@
 <script>
   import { H_config } from '../../../../network/config';
   import {
-    getOrderByOrderNum
-  } from '../../../../network/work';
+    getExpressSpec,
+    setExpressSpec,
+    deleteExpressSpec
+  } from '../../../../network/user';
   import toast from '../../../../components/toast';
 
   export default {
@@ -97,35 +199,117 @@
           }
         ],
         express: [],
+        specHeaders: [
+          {
+            text: '规格名称',
+            align: 'center',
+            sortable: false,
+            value: 'specifications',
+          },
+          {
+            text: '价格',
+            align: 'center',
+            sortable: false,
+            value: 'price',
+          },
+          {
+            text: '操作',
+            align: 'center',
+            sortable: false,
+            value: 'actions',
+          },
+        ],
+        specs: [],
         search: '',
         rule: [
           v => /^[0-9]{6}$/.test(v) || '取件码必须为6位数字',
         ],
+        nameRules: [
+          v => !!v || '规格名不能为空'
+        ],
+        priceRules: [
+          v => v != null || '价格不能为空',
+          v => /^[0-9]+([.]\d{1,2})?$/.test(v) || '必须为数字且最多包含两位小数',
+        ],
         disable: true,
+        specDialog: false,
+        isDeleteSpec: false,
+        deleteId: '',
+        dialog: false,
+        valid: false,
+        specName: '',
+        specPrice: 0,
+
       }
     },
     components: {
       toast
     },
     methods: {
-      _getOrderByOrderNum() {
-        getOrderByOrderNum({
-          orderNumber: this.search
-        }).then(res => {
-          if(res.code === H_config.STATECODE_getOrderByOrderNum_SUCCESS) {
-            this.orders = []
-            this.orders.push(res.data)
-            this.$refs.toast.setAlert('查询成功')
-          } else if(res.code === H_config.STATECODE_getOrderByOrderNum_FAILED) {
-            this.$refs.toast.setAlert(res.msg, 'primary')
+      // _getOrderByOrderNum() {
+      //   getOrderByOrderNum({
+      //     orderNumber: this.search
+      //   }).then(res => {
+      //     if(res.code === H_config.STATECODE_getOrderByOrderNum_SUCCESS) {
+      //       this.orders = []
+      //       this.orders.push(res.data)
+      //       this.$refs.toast.setAlert('查询成功')
+      //     } else if(res.code === H_config.STATECODE_getOrderByOrderNum_FAILED) {
+      //       this.$refs.toast.setAlert(res.msg, 'primary')
+      //     } else {
+      //       this.$refs.toast.setAlert('查询失败', 'error')
+      //     }
+      //   })
+      // },
+      // checkOrderDetails(item) {
+      //   this.$store.commit('updateOrder', item)
+      //   this.$router.push('searchOrder/orderDetails')
+      // },
+      getSpec() {
+        getExpressSpec().then(res => {
+          console.log(res);
+          if(res.code === H_config.STATECODE_express_SUCCESS) {
+            this.specs = res.data
+            this.specDialog = true
           } else {
-            this.$refs.toast.setAlert('查询失败', 'error')
+            this.$refs.toast.setAlert('加载失败', 'error')
           }
         })
       },
-      checkOrderDetails(item) {
-        this.$store.commit('updateOrder', item)
-        this.$router.push('searchOrder/orderDetails')
+      save() {
+        const expressAgentPrice = JSON.stringify({
+          specifications: this.specName,
+          price: Number(this.specPrice)
+        })
+        setExpressSpec(expressAgentPrice).then(res => {
+          console.log(res);
+          if(res.code === H_config.STATECODE_setExpressSpec_SUCCESS) {
+            this.$refs.toast.setAlert('设置成功')
+            this.getSpec()
+            this.dialog = false
+            this.specPrice = 0
+            this.specName = ''
+          } else {
+            this.$refs.toast.setAlert('设置失败', 'error')
+          }
+        })
+      },
+      deleteSpec(spec) {
+        this.deleteId = spec.id
+        this.isDeleteSpec = true
+      },
+      confirmDelete() {
+        deleteExpressSpec({
+          id: this.deleteId
+        }).then(res => {
+          if(res.code === H_config.STATECODE_express_SUCCESS) {
+            this.$refs.toast.setAlert('删除成功')
+            this.isDeleteSpec = false
+            this.getSpec()
+          } else {
+            this.$refs.toast.setAlert('删除失败', 'error')
+          }
+        })
       }
     }
   }

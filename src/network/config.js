@@ -63,6 +63,15 @@ H_config.API_updateAllRunStatus_URL = '/managerInfo/updateAllRunStatus'
 // 修改店铺置顶
 H_config.API_updateTopStatus_URL = '/managerInfo/updateTopStatus'
 
+// 查询一星期内收入
+H_config.API_getWeeksProfit_URL = '/data/selectPlatformProfitInWeek'
+H_config.STATECODE_getProfit_SUCCESS = 3207
+// 查询一月内收入
+H_config.API_getMonthsProfit_URL = '/data/selectNearMonthProfit'
+// 查询一年内收入
+H_config.API_getYearsProfit_URL = '/data/selectMonthlyProfit'
+// 查询某一天收入
+H_config.API_getDayProfit_URL = '/data/selectCenterProfitByDay'
 
 // 骑手
 H_config.STATECODE_rider_SUCCESS = 3200
@@ -84,8 +93,13 @@ H_config.STATECODE_getShareSchoolByStatus_SUCCESS = 3200
 H_config.API_updateShareSchoolStatus_URL = '/shareschool/updateStatus'
 H_config.STATECODE_updateShareSchoolStatus_SUCCESS = 2220
 
+H_config.API_getExpressSpec_URL = '/expressAgent/selectExpressAgentPrice'
+H_config.STATECODE_express_SUCCESS = 3200
+H_config.API_deleteSpec_URL = '/expressAgent/deletePriceById'
 
-H_config.API_test_URL = '/modifyShopInfo/updatePhoto'
+H_config.API_setExpressSpec_URL = '/expressAgent/addNewExpressAgentPrice'
+H_config.STATECODE_setExpressSpec_SUCCESS = 3200
+
 
 export {
   BASE_URL,

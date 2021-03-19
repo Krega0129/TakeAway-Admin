@@ -47,6 +47,7 @@ export default function axios(option) {
     })
 
     // 2.传入对象进行网络请求
+    console.log(option);
     instance(option).then(res => {
       resolve(res)
     }).catch(err => {
