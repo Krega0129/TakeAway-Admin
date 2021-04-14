@@ -34,11 +34,6 @@
         required
       ></v-text-field>
 
-      <div class="tag d-flex justify-space-between text-caption">
-        <a href="#">注册账号</a>
-        <a href="#">忘记密码</a>
-      </div>
-
       <v-btn
         :disabled="!valid"
         color="success"
@@ -54,6 +49,10 @@
 
 <script>
   import toast from '../components/toast';
+import { H_config } from '../network/config';
+  import { 
+    login
+   } from "../network/work";
 
   export default {
     data() {
@@ -80,15 +79,29 @@
     methods: {
       validate () {
         this.$refs.form.validate()
-        if(this.account == 'admin' && this.password === 'admin') {
-          localStorage.setItem('takeAwayManage_TOKEN', 11)
-          localStorage.setItem('account', this.account)
-          this.$store.commit('login', this.account)
-          this.$refs.toast.setAlert('登录成功')
-          this.$router.replace('/admin') 
-        } else {
-          this.$refs.toast.setAlert('账号或密码错误', 'error')
-        }
+        // if(this.account == 'admin' && this.password === 'admin') {
+        //   localStorage.setItem('takeAwayManage_TOKEN', 11)
+        //   localStorage.setItem('account', this.account)
+        //   this.$store.commit('login', this.account)
+        //   this.$refs.toast.setAlert('登录成功')
+        //   this.$router.replace('/admin') 
+        // } else {
+        //   this.$refs.toast.setAlert('账号或密码错误', 'error')
+        // }
+        login({
+          account: this.account,
+          password: this.password
+        }).then(res => {
+          if(res.code === H_config.STATECODE_SUCCESS) {
+            localStorage.setItem('takeAwayManage_TOKEN', res.data.token);
+            localStorage.setItem('campusAddress', res.data.campusAddress || '管理员')
+            this.$store.commit('login', res.data.campusAddress || '管理员')
+            this.$refs.toast.setAlert('登录成功')
+            this.$router.replace('/admin/poster') 
+          } else {
+            this.$refs.toast.setAlert('账号或密码错误', 'error')
+          }
+        })
       }
     }
   }

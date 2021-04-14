@@ -82,3 +82,15 @@ export function deleteRiderInfo(data) {
     }
   })
 }
+
+// 删除骑手信息
+export function selectRiderOrderInfoByDate(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_selectRiderOrderInfoByDate_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}

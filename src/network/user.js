@@ -28,8 +28,9 @@ export function updateShareSchoolStatus(data) {
 }
 
 // 设置快递规格
-export function getExpressSpec() {
+export function getExpressSpec(data) {
   return axios({
+    params: data,
     url: H_config.API_getExpressSpec_URL, 
   })
 }

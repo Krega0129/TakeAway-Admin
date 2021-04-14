@@ -29,6 +29,7 @@
           <v-spacer></v-spacer>
 
           <v-select
+            v-if="$store.state.topManager"
             dense
             class="mt-6 mr-5"
             :items="campus"
@@ -52,7 +53,7 @@
 
           <v-dialog v-model="dialog" max-width="500px">
             <v-card>
-              <v-card-title class="headline">确定{{`riders[editIndex].driverStatus` == 3 ? '解封' : '封停'}}该骑手?</v-card-title>
+              <v-card-title class="headline">确定{{riders[editIndex] ? riders[editIndex].driverStatus == 3 ? '解封' : '封停' : '' }}该骑手?</v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="closeDialog">取消</v-btn>
@@ -64,6 +65,9 @@
         </v-toolbar>
       </template>
 
+      <template v-slot:[`item.driverIdentity`]="{ item }">
+        {{item.driverStatus == 1 ? '外卖骑手' : '快递骑手'}}
+      </template>
       <template v-slot:[`item.driverStatus`]="{ item }">
         {{item.driverStatus == 3 ? '已封停' : '正常'}}
       </template>
@@ -124,6 +128,12 @@ export default {
           align: 'start',
           sortable: false,
           value: 'driverName'
+        },
+        {
+          text: '类别',
+          align: 'center',
+          sortable: false,
+          value: 'driverIdentity'
         },
         {
           text: '电话号码',
@@ -208,8 +218,8 @@ export default {
     },
     _getAllRiders() {
       getRiderByStatus({
-        campusName: this.selectCampusVal == '全部校区' ? '' : this.selectCampusVal,
-        driverStatus: this.selectStatusVal == '全部' ? '' : this.selectStatusVal == '正常' ? 1 : 3
+        campusName: localStorage.getItem('campusAddress') === '管理员' ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress'),
+        driverStatus: this.selectStatusVal === '全部' ? '' : this.selectStatusVal === '正常' ? 1 : 3
       }).then(res => {
         if(res.code == H_config.STATECODE_rider_SUCCESS) {
           this.riders = res.data

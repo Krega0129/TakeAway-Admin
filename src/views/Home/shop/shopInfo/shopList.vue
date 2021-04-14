@@ -32,6 +32,7 @@
           <v-spacer></v-spacer>
 
           <v-select
+            v-if="$store.state.topManager"
             dense
             class="mt-6"
             :items="campus"
@@ -216,7 +217,7 @@
       },
       _getShop() {
         getShop({
-          address: this.campusSelectVal == '全部校区' ? '' : this.campusSelectVal
+          address: localStorage.getItem('campusAddress') === '管理员' ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress')
         }).then(res => {
           if(res.code == H_config.STATECODE_get_SUCCESS) {
             this.shop = res.data

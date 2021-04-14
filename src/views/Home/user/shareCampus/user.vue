@@ -36,6 +36,7 @@
             ></v-select>
 
             <v-select
+              v-if="$store.state.topManager"
               dense
               class="mt-6"
               :items="campus"
@@ -76,6 +77,7 @@
             max-width="50"
             max-height="50"
             :src="BASE_URL + '/' + item.sharePicture"
+            @click="$refs.img.scaleImg(BASE_URL + '/' + item.sharePicture)"
           ></v-img>
         </template>
         
@@ -256,7 +258,7 @@
       _getShareSchoolByStatus() {
         getShareSchoolByStatus({
           auditStatus: this.selectStatusIndex,
-          campusName: this.selectCampusVal === '全部校区' ? '' : this.selectCampusVal,
+          campusName: localStorage.getItem('campusAddress') === '管理员' ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress'),
           pageNum: this.page,
           pageSize: 6
         }).then(res => {

@@ -10,6 +10,7 @@
       <div></div>
       <v-spacer></v-spacer>
       <v-select
+        v-if="$store.state.topManager"
         dense
         class="mt-6 mx-5"
         :items="campus"

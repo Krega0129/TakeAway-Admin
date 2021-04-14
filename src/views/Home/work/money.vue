@@ -19,6 +19,16 @@
         solo
         style="max-width: 15vw"
       ></v-select>
+      <v-spacer></v-spacer>
+      <v-select
+        v-if="$store.state.topManager"
+        :items="campus"
+        v-model="campusSelectValue"
+        label="全部校区"
+        dense
+        solo
+        style="max-width: 15vw"
+      ></v-select>
 
       <v-spacer></v-spacer>
       <v-dialog
@@ -61,7 +71,7 @@
           </v-btn>
         </v-date-picker>
       </v-dialog>
-      <v-dialog max-width="600px" v-model="setTakePercentage">
+      <v-dialog max-width="600px" v-model="setTakePercentageDialog">
         <v-card>
           <v-toolbar flat>
             <v-card-title>设置抽成比</v-card-title>
@@ -108,9 +118,31 @@
                   ></v-text-field>
                 </v-col>
                 <v-col cols="6">
-                  骑手抽成比：
+                  外卖骑手抽成比：
                   <v-text-field
                     v-model="newRiderTakePercentage"
+                    :rules="takePercentageRules"
+                    append-outer-icon="%"
+                    reverse
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="6">
+                  校区负责人抽成比：
+                  <v-text-field
+                    v-model="newManagerTakePercentage"
+                    :rules="takePercentageRules"
+                    append-outer-icon="%"
+                    required
+                    reverse
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="6">
+                  快递骑手抽成比：
+                  <v-text-field
+                    v-model="newExpressTakePercentage"
                     :rules="takePercentageRules"
                     append-outer-icon="%"
                     reverse
@@ -125,7 +157,7 @@
             <v-btn
               color="blue darken-1"
               text
-              @click="setTakePercentage = false"
+              @click="setTakePercentageDialog = false"
             >
               取消
             </v-btn>
@@ -146,23 +178,27 @@
         <div class="echart d-inline-block" ref="echartA" style="width: 90%; height: 60vh;"></div>
       </v-col>
       <v-col cols="3">
-        <v-card style="min-height: 36vh">
+        <v-card style="min-height: 60vh; min-width: 200px">
           <v-card-title class="font-weight-bold">今日收入：</v-card-title>
           <div class="font-weight-bold text-h3 text-center red--text my-5">￥{{profit}}</div>
-          <v-card-text class="mt-15 pl-10 text-left">
-            <div class="text-subtitle-1 font-weight-bold">商家抽成比：{{shopTakePercentage}} %</div>
-            <div class="text-subtitle-1 font-weight-bold">骑手抽成比：{{riderTakePercentage}} %</div>
-          </v-card-text>
-          <v-card-actions class="px-10">
-            <v-btn
-              color="primary"
-              dense
-              block
-              @click="setTakePercentage = true"
-            >
-              修改
-            </v-btn>
-          </v-card-actions>
+          <div style="position: absolute; bottom: 20px; width: 100%">
+            <v-card-text class="mt-10 pl-6 text-left">
+              <div class="text-subtitle-1 font-weight-bold" style="white-space: nowrap">商家抽成比：{{shopTakePercentage}} %</div>
+              <div class="text-subtitle-1 font-weight-bold" style="white-space: nowrap">骑手抽成比：{{riderTakePercentage}} %</div>
+              <div class="text-subtitle-1 font-weight-bold" style="white-space: nowrap">负责人抽成比：{{managerTakePercentage}} %</div>
+              <div class="text-subtitle-1 font-weight-bold" style="white-space: nowrap">快递抽成比：{{expressTakePercentage}} %</div>
+            </v-card-text>
+            <v-card-actions class="px-10">
+              <v-btn
+                color="primary"
+                dense
+                block
+                @click="openSetTakePercentageDialog"
+              >
+                修改
+              </v-btn>
+            </v-card-actions>
+          </div>
         </v-card>
       </v-col>
     </v-row>
@@ -176,12 +212,14 @@
   const echarts = require('echarts')
   import {
     getNewestTakePercentage,
+    getNewestTakePercentageByCampus,
     setTakePercentage,
     getProfitHistory,
     getWeeksProfit,
     getMonthsProfit,
     getYearsProfit,
-    getDayProfit
+    getDayProfit,
+    getAllCampus
   } from '../../../network/work'
   import { H_config } from '../../../network/config';
   import toast from '../../../components/toast';
@@ -189,12 +227,17 @@
     name: 'money',
     data() {
       return {
-        setTakePercentage: false,
+        setTakePercentageDialog: false,
         time: ['7天内', '30天内', '一年内'],
-        shopTakePercentage: '',
-        riderTakePercentage: '',
+        campus: ['全部校区'],
+        shopTakePercentage: '请选择校区',
+        riderTakePercentage: '请选择校区',
+        managerTakePercentage: '请选择校区',
+        expressTakePercentage: '请选择校区',
         newShopTakePercentage: '',
         newRiderTakePercentage: '',
+        newManagerTakePercentage: '',
+        newExpressTakePercentage: '',
         takePercentageRules: [
           v => !!v || '抽成比不能为空',
           v => /^0*?[0-9]{1,2}$/.test(v) || '抽成比只能为 1% ~ 90% 之间的整数',
@@ -234,6 +277,7 @@
         records: [],
         profitSelectValue: '七天内',
         profitSelectIndex: 0,
+        campusSelectValue: '全部校区',
         profit: 0.00
       }
     },
@@ -241,12 +285,12 @@
       toast
     },
     mounted() {
-      getNewestTakePercentage().then(res => {
-        if(res.code === H_config.STATECODE_takePercentage_SUCCESS) {
-          this.riderTakePercentage = res.data.profitDriver * 100
-          this.shopTakePercentage = res.data.profitMerchant * 100
+      this.$store.state.topManager && getAllCampus().then(res => {
+        if(res.code === H_config.STATECODE_SUCCESS) {
+          this.campus.push(...res.data.map(item => item.campusName))
         }
       })
+      
       this.renewCharts()
       this._getDayProfit(this.date)
     },
@@ -260,6 +304,9 @@
       },
       riderTakePercentage(val) {
         this.newRiderTakePercentage = val
+      },
+      campusSelectValue() {
+        this._getNewestTakePercentageByCampus()
       }
     },
     methods: {
@@ -278,7 +325,7 @@
           }).then(res => {
             if(res.code === H_config.STATECODE_getProfit_SUCCESS) {
               profit = res.data.map(item => {
-                return item === null ? 0 : item
+                return item || 0
               })
             } else {
               this.$refs.toast.setAlert('加载失败', 'error')
@@ -293,7 +340,7 @@
           }).then(res => {
             if(res.code === H_config.STATECODE_getProfit_SUCCESS) {
               profit = res.data.map(item => {
-                return item === null ? 0 : Number(item).toFixed(2)
+                return item || Number(item).toFixed(2)
               })
             } else {
               this.$refs.toast.setAlert('加载失败', 'error')
@@ -310,7 +357,7 @@
           }).then(res => {
             if(res.code === H_config.STATECODE_getProfit_SUCCESS) {
               profit = res.data.map(item => {
-                return item === null ? 0 : Number(item).toFixed(2)
+                return item || Number(item).toFixed(2)
               })
             } else {
               this.$refs.toast.setAlert('加载失败', 'error')
@@ -319,7 +366,6 @@
         }
 
         let myChartA = echarts.init(this.$refs.echartA);
-        console.log(profit);
         let optionA = {
           tooltip: {},
           legend: {
@@ -343,27 +389,65 @@
           myChartA.resize()
         }
       },
+      _getNewestTakePercentageByCampus() {
+        if(this.campusSelectValue === '全部校区') {
+          this.shopTakePercentage = '请选择校区'
+          this.riderTakePercentage = '请选择校区'
+          this.managerTakePercentage = '请选择校区'
+          this.expressTakePercentage = '请选择校区'
+        } else {
+          getNewestTakePercentageByCampus({
+            campusName: this.campusSelectValue
+          }).then(res => {
+            if(res.code === H_config.STATECODE_takePercentage_SUCCESS) {
+              this.riderTakePercentage = res.data.profitDriver * 100
+              this.shopTakePercentage = res.data.profitMerchant * 100
+              this.managerTakePercentage = res.data.profitDriverAdmin * 100
+              this.expressTakePercentage = res.data.profitAgent * 100
+            } else {
+              this.riderTakePercentage = 0
+              this.shopTakePercentage = 0
+              this.managerTakePercentage = 0
+              this.expressTakePercentage = 0
+            }
+          })
+        }
+      },
       save() {
+        /**
+         * 设置抽成比例
+         * @param {profitDriver} 骑手抽成比
+         * @param {profitMerchant} 商家抽成比
+         */
         setTakePercentage({
+          campusName: this.campusSelectValue,
           profitDriver: this.newRiderTakePercentage / 100,
-          profitMerchant: this.newShopTakePercentage / 100
+          profitMerchant: this.newShopTakePercentage / 100,
+          profitDriverAdmin: this.newManagerTakePercentage / 100,
+          profitAgent: this.newExpressTakePercentage / 100
         }).then(res => {
           if(res.code === H_config.STATECODE_takePercentage_SUCCESS) {
-            this.riderTakePercentage = this.newRiderTakePercentage
-            this.shopTakePercentage = this.newShopTakePercentage
+            this._getNewestTakePercentageByCampus()
             this.$refs.toast.setAlert('修改成功')
           } else {
             this.$refs.toast.setAlert('修改失败', 'error')
           }
-          this.setTakePercentage = false
+          this.setTakePercentageDialog = false
         })
+      },
+      openSetTakePercentageDialog() {
+        if(this.campusSelectValue !== '全部校区') {
+          this.setTakePercentageDialog = true
+        } else {
+          this.$refs.toast.setAlert('请先选择校区', 'primary')
+        }
       },
       getProfitRecord() {
         getProfitHistory().then(res => {
           if(res.code === H_config.STATECODE_takePercentage_SUCCESS) {
             this.records = res.data
           } else {
-            
+            this.$refs.toast.setAlert('加载失败', 'error')
           }
         })
       },
@@ -373,7 +457,6 @@
         }).then(res => {
           if(res.code === H_config.STATECODE_getProfit_SUCCESS) {
             this.profit = res.data === null ? 0.00 : Number(res.data).toFixed(2)
-            console.log(this.profit);
           } else {
             this.$refs.toast.setAlert('加载失败', 'error')
           }

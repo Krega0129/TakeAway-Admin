@@ -39,7 +39,7 @@
           max-height="200"
           class="mt-5"
           :src="BASE_URL + '/' + shareCampus.sharePicture"
-          @click="$refs.img.scaleImg(BASE_URL + '/' + '')"
+          @click="$refs.img.scaleImg(BASE_URL + '/' + shareCampus.sharePicture)"
         ></v-img>
       </v-card>
     </v-card>

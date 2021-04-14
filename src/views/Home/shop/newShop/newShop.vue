@@ -43,6 +43,7 @@
           ></v-select>
 
           <v-select
+            v-if="$store.state.topManager"
             dense
             class="mt-6"
             :items="campus"
@@ -243,7 +244,7 @@
       _getShop() {
         getShop({
           auditStatus: this.statusSelectIndex,
-          address: this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal
+          address: this.$store.state.topManager ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : this.$store.state.topManager
         }).then(res => {
           if(res && res.code == H_config.STATECODE_get_SUCCESS) {
             // this.$store.commit('updateShopList', res.data)

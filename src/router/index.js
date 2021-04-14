@@ -9,6 +9,9 @@ const Campus = () => import('@/views/Home/work/campus');
 const Poster = () => import('@/views/Home/work/poster');
 const SearchOrder = () => import('@/views/Home/work/searchOrder');
 const OrderDetails = () => import('@/views/Home/work/orderDetails');
+const Profit = () => import('@/views/Home/work/profit')
+const SetNotice = () => import('@/views/Home/work/setNotice')
+const Advice = () => import('@/views/Home/work/advice')
 
 const NewShop = () => import('@/views/Home/shop/newShop/newShop');
 const NewShopInfo = () => import('@/views/Home/shop/newShop/newShopInfo')
@@ -32,7 +35,14 @@ Vue.use(VueRouter)
 const adminRoute = [
   {
     path: '',
-    redirect: 'money'
+    redirect: 'poster'
+  },
+  {
+    path: 'poster',
+    meta: {
+      title: '海报设置'
+    },
+    component: Poster
   },
   {
     path: 'money',
@@ -42,6 +52,13 @@ const adminRoute = [
     component: Money
   },
   {
+    path: 'profit',
+    meta: {
+      title: '抽成比例'
+    },
+    component: Profit
+  },
+  {
     path: 'campus',
     meta: {
       title: '设置校区'
@@ -49,11 +66,18 @@ const adminRoute = [
     component: Campus
   },
   {
-    path: 'poster',
+    path: 'setNotice',
     meta: {
-      title: '海报设置'
+      title: '公告&提示'
     },
-    component: Poster
+    component: SetNotice
+  },
+  {
+    path: 'advice',
+    meta: {
+      title: '投诉建议'
+    },
+    component: Advice
   },
   {
     path: 'searchOrder',

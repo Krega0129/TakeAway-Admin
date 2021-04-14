@@ -8,7 +8,7 @@ export default function axios(option) {
     const instance = originAxios.create({
       withCredentials: true,
       baseURL: BASE_URL,
-      timeout: 5000
+      timeout: 60000
     });
 
     // 配置请求和响应拦截
@@ -47,7 +47,6 @@ export default function axios(option) {
     })
 
     // 2.传入对象进行网络请求
-    console.log(option);
     instance(option).then(res => {
       resolve(res)
     }).catch(err => {

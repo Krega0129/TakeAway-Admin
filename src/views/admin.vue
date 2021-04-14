@@ -46,7 +46,7 @@
 
       <v-spacer></v-spacer>
 
-        你好，{{account}}
+        你好，{{campusAddress}}
 
       <!-- <v-btn icon>
         <v-icon>mdi-dots-vertical</v-icon>
@@ -66,15 +66,122 @@
           </v-btn>
         </template>
         <v-list>
-          <v-list-item
-            v-for="(item, i) in menu"
-            :key="i"
-            @click="() => {}"
-          >
-            <v-list-item-title class="black--text px-4"> {{ item.title }} </v-list-item-title>
+          <v-list-item v-if="topManager" @click="accountManage = true">
+            <v-list-item-title class="black--text px-4"> 账号管理 </v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="logOut">
+            <v-list-item-title class="black--text px-4"> 退出登录 </v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
+
+      <v-dialog v-model="accountManage" max-width="800">
+        <v-card>
+          <v-toolbar dense flat>
+            <v-toolbar-title>账号管理</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="success"
+              @click="setAccount = true"
+              small
+            >
+              新增账号
+            </v-btn>
+          </v-toolbar>
+          <v-data-table
+            :headers="accountHeaders"
+            :items="accountItems"
+            class="elevation-1"
+            no-data-text="没有数据"
+            hide-default-footer
+            item-key="managerId"
+          >
+            <template v-slot:[`item.actions`]="{ item }">
+              <v-icon
+                @click="chooseCampus(item)"
+              >
+                mdi-delete
+              </v-icon>
+            </template>
+          </v-data-table>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="setAccount" max-width="600">
+        <v-card>
+          <v-card-title>新增账号</v-card-title>
+          <v-form
+            v-model="valid"
+          >
+            <v-card-text>
+              <v-row>
+                <v-col cols="5">
+                  <v-text-field
+                    :rules="accountRules"
+                    label="账号"
+                    v-model="account"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="5">
+                  <v-text-field
+                    :type="showPassword ? 'text' : 'password'"
+                    :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    label="密码"
+                    v-model="password"
+                    :rules="passwordRules"
+                    @click:append="showPassword = !showPassword"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="5">
+                  <v-text-field
+                    :rules="rules"
+                    label="校区"
+                    v-model="campus"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="5">
+                  <v-text-field
+                    label="微信号"
+                    v-model="wechat"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-form>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="setAccount = false">
+              取消
+            </v-btn>
+            <v-btn color="primary"
+              @click="addNewAccount"
+              :disabled="!valid"
+            >
+              确定
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="deleteCampus" max-width="600">
+        <v-card>
+          <v-card-title>确认删除该账号？</v-card-title>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="deleteCampus = false">
+              取消
+            </v-btn>
+            <v-btn color="primary"
+              @click="deleteAccount()"
+            >
+              确定
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
     </v-app-bar>
     <v-main class="main">
       <v-container fluid>
@@ -83,10 +190,21 @@
         </transition>
       </v-container>
     </v-main>
+
+    <toast ref="toast"></toast>
+
   </v-app>
 </template>
 
 <script>
+  import { H_config } from '../network/config';
+  import toast from '../components/toast';
+  import { 
+    getAllManagerAccount,
+    deleteManagerAccount,
+    addNewManagerAccount
+  } from '../network/work';
+
   export default {
     name: 'admin',
     data() {
@@ -98,10 +216,9 @@
             title: '平台',
             items: [
               {
-                // 包含查看订单金额
-                action: '资金管理',
-                title: '资金管理',
-                route: '/admin/money'
+                action: '海报',
+                title: '海报',
+                route: '/admin/poster'
               },
               {
                 action: '订单查询',
@@ -109,15 +226,10 @@
                 route: '/admin/searchOrder'
               },
               {
-                action: '海报',
-                title: '海报',
-                route: '/admin/poster'
+                action: '公告&提示',
+                title: '公告&提示',
+                route: '/admin/setNotice'
               },
-              {
-                action: '设置校区',
-                title: '设置校区',
-                route: '/admin/campus'
-              }
             ]
           },
           {
@@ -175,25 +287,151 @@
           }
         ],
         title: '资金管理',
-        menu: [
+        campusAddress: localStorage.getItem('campusAddress'),
+        topManager: localStorage.getItem('campusAddress') === '管理员',
+        accountManage: false,
+        accountHeaders: [
           {
-            title: '退出登录'
+            text: '校区名称',
+            align: 'start',
+            sortable: false,
+            value: 'campusAddress'
+          },
+          {
+            text: '账号',
+            align: 'start',
+            sortable: false,
+            value: 'account'
+          },
+          {
+            text: '密码',
+            align: 'start',
+            sortable: false,
+            value: 'str'
+          },
+          {
+            text: '微信',
+            align: 'start',
+            sortable: false,
+            value: 'wechat'
+          },
+          {
+            text: '操作',
+            align: 'center',
+            sortable: false,
+            value: 'actions'
           }
         ],
-        account: localStorage.getItem('account')
+        accountItems: [],
+        setAccount: false,
+        deleteCampus: false,
+        managerId: -1,
+        accountRules: [
+          v => !!v || '内容不能为空',
+          v => /^\d{5,9}$/.test(v) || '只能5-9位数字'
+        ],
+        passwordRules: [
+          v => !!v || '内容不能为空',
+          v => /^\w{6,16}$/.test(v) || '只能6-16位数字字母下划线'
+        ],
+        rules: [
+          v => !!v || '内容不能为空',
+        ],
+        showPassword: false,
+        valid: true,
+        account: '',
+        password: '',
+        campus: '',
+        wechat: ''
       }
     },
     components: {
-      
+      toast
     },
     mounted() {
       this.title = this.$route.meta.title
+      this._getAllManagerAccount()
+      if(this.$store.state.topManager || localStorage.getItem('campusAddress') === '管理员') {
+        this.items[0].items.push({
+          action: '设置校区',
+          title: '设置校区',
+          route: '/admin/campus'
+        }, {
+          // 包含查看订单金额
+          action: '资金管理',
+          title: '资金管理',
+          route: '/admin/money'
+        }, {
+          action: '投诉与建议',
+          title: '投诉与建议',
+          route: '/admin/advice'
+        },)
+      } else {
+        this.items[0].items.push({
+          action: '设置抽成比',
+          title: '设置抽成比',
+          route: '/admin/profit'
+        })
+      }
     },
     watch: {
       $route: {
         handler(val, oldval) {
           this.title = val.meta.title
         }
+      }
+    },
+    methods: {
+      _getAllManagerAccount() {
+        getAllManagerAccount().then(res => {
+          if(res.code === H_config.STATECODE_SUCCESS) {
+            this.accountItems = res.data
+          }
+        })
+      },
+      chooseCampus(item) {
+        this.deleteCampus = true
+        this.managerId = item.managerId
+      },
+      logOut() {
+        localStorage.removeItem('takeAwayManage_TOKEN')
+        localStorage.removeItem('campusAddress')
+        history.go(0)
+      },
+      addNewAccount() {
+        addNewManagerAccount({
+          account: this.account,
+          password: this.password,
+          campusAddress: this.campus,
+          wechat: this.wechat
+        }).then(res => {
+          if(res.code === H_config.STATECODE_SUCCESS) {
+            this.setAccount = false
+            Object.assign(this, {
+              account: '',
+              password: '',
+              campus: '',
+              wechat: ''
+            })
+            this._getAllManagerAccount()
+            this.$refs.toast.setAlert('新增成功')
+          } else {
+            this.$refs.toast.setAlert('新增失败', 'error')
+          }
+        })
+      },
+      deleteAccount() {
+        deleteManagerAccount({
+          managerId: this.managerId
+        }).then(res => {
+          if(res.code === H_config.STATECODE_SUCCESS) {
+            this._getAllManagerAccount()
+            this.deleteCampus = false
+            this.$refs.toast.setAlert('删除成功')
+          } else {
+            this.$refs.toast.setAlert('删除失败', 'error')
+          }
+        })
       }
     }
   }

@@ -1,5 +1,18 @@
 import axios from './axios'
 import { H_config } from './config'
+import qs from 'qs';
+
+// 登录
+export function login(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_login_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
 
 // 新增校区
 export function addCampus(data) {
@@ -17,6 +30,37 @@ export function addCampus(data) {
 export function getAllCampus(data) {
   return axios({
     url: H_config.API_getAllCampus_URL
+  })
+}
+
+// 获取所有管理员账号
+export function getAllManagerAccount(data) {
+  return axios({
+    url: H_config.API_getAllManagerAccount_URL
+  })
+}
+
+// 删除管理员账号
+export function addNewManagerAccount(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_addNewManagerAccount_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+// 删除管理员账号
+export function deleteManagerAccount(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_deleteManagerAccount_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
   })
 }
 
@@ -86,6 +130,18 @@ export function deletePhoto(data) {
   })
 }
 
+// 获取所有订单
+export function selectAllOrder(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_selectAllOrder_URL, 
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
 // 根据订单号查询订单
 export function getOrderByOrderNum(data) {
   return axios({
@@ -109,14 +165,26 @@ export function getNewestTakePercentage() {
   })
 }
 
+// 获取当前抽成比
+export function getNewestTakePercentageByCampus(data) {
+  return axios({
+    method: 'post',
+    data: data,
+    url: H_config.API_getNewestTakePercentageByCampus_URL,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
 // 设置抽成比
 export function setTakePercentage(data) {
   return axios({
     method: 'post',
     url: H_config.API_setTakePercentage_URL, 
-    data: data,
+    data: JSON.stringify(data),
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/json'
     }
   })
 }
@@ -179,3 +247,46 @@ export function getDayProfit(data) {
     }
   })
 }
+
+// 获取校区公告
+export function getNotice(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_getNotice_URL,
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+// 设置校区公告
+export function setNotice(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_setNotice_URL,
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+// 设置入驻提示
+export function setTip(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_setTip_URL,
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+export function getAdvice() {
+  return axios({
+    url: H_config.API_getAdvice_URL
+  })
+}
+

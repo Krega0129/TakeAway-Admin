@@ -3,163 +3,235 @@
 
     <toast ref="toast"></toast>
 
-    <v-data-table
-      :headers="headers"
-      :items="express"
-      class="elevation-1"
-      no-data-text="没有数据"
-      hide-default-footer
-      item-key="shopName"
+    <div
       v-if="this.$route.meta.title === '快递查询'"
     >
-      <template v-slot:top>
-        <v-toolbar flat>
-          <v-form
-            v-model="disable"
-            class="d-flex"
-          >
-            <v-text-field
-              v-model="search"
-              append-icon="mdi-magnify"
-              :rules="rule"
-              label="输入取件码"
-              class="mt-6"
-            ></v-text-field>
+      <v-data-table
+        :headers="headers"
+        :items="express"
+        class="elevation-1"
+        no-data-text="没有数据"
+        hide-default-footer
+        item-key="shopName"
+      >
+        <template v-slot:top>
+          <v-toolbar flat>
+            <v-form
+              v-model="disable"
+              class="d-flex"
+            >
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                :rules="rule"
+                label="输入取件码"
+                class="mt-6"
+              ></v-text-field>
+              <v-btn
+                color="primary"
+                class="ml-5 mt-6"
+                @click=""
+                :disabled="!disable"
+              >
+                搜索
+              </v-btn>
+            </v-form>
+            <v-spacer></v-spacer>
+            
+            <v-select
+              v-if="topManager"
+              :items="campus"
+              v-model="campusSelectValue"
+              :label="campus[0]"
+              dense
+              solo
+              class="mt-7"
+              style="max-width: 15vw"
+            ></v-select>
+            <v-spacer></v-spacer>
+            <v-dialog
+              ref="dialog"
+              :return-value.sync="date"
+              width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="date"
+                  label="选择日期"
+                  prepend-icon="mdi-calendar"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                  class="mt-5 mr-5"
+                  style="max-width: 150px"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="date"
+                :max="maxDate"
+                scrollable
+              >
+                <v-spacer></v-spacer>
+                <v-btn
+                  text
+                  color="primary"
+                  @click="$refs.dialog.save(date)"
+                >
+                  确定
+                </v-btn>
+              </v-date-picker>
+            </v-dialog>
+            <v-spacer></v-spacer>
             <v-btn
               color="primary"
-              class="ml-5 mt-6"
-              @click=""
-              :disabled="!disable"
+              @click="getSpec"
             >
-              搜索
+              管理规格
             </v-btn>
-          </v-form>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            @click="getSpec"
-          >
-            管理规格
-          </v-btn>
 
-          <v-dialog
-            max-width="600"
-            v-model="specDialog"
-          >
-            <v-card>
-              <v-data-table
-                :headers="specHeaders"
-                :items="specs"
-                class="elevation-1"
-                no-data-text="没有数据"
-                hide-default-footer
-                item-key="shopName"
-              >
-                <template v-slot:top>
-                  <v-toolbar flat>
-                    <v-toolbar-title>
-                      规格列表
-                    </v-toolbar-title>
+            <v-dialog
+              max-width="600"
+              v-model="specDialog"
+            >
+              <v-card>
+                <v-data-table
+                  :headers="specHeaders"
+                  :items="specs"
+                  class="elevation-1"
+                  no-data-text="没有数据"
+                  hide-default-footer
+                  item-key="shopName"
+                >
+                  <template v-slot:top>
+                    <v-toolbar flat>
+                      <v-toolbar-title>
+                        规格列表
+                      </v-toolbar-title>
+                      <v-spacer></v-spacer>
+                      <v-select
+                        v-if="topManager"
+                        dense
+                        class="mt-6"
+                        :items="campus"
+                        style="width: 30px"
+                        :label="campus[0]"
+                        @change="getSpec"
+                        solo
+                        v-model="ggCampusSelectValue"
+                      ></v-select>
+                      <v-spacer></v-spacer>
+                      <v-btn
+                        color="primary"
+                        @click="dialog = true"
+                      >
+                        新增规格
+                      </v-btn>
+                    </v-toolbar>
+                  </template>
+
+                  <template v-slot:[`item.actions`]="{ item }">
+                    <v-icon @click="deleteSpec(item)">
+                      mdi-delete
+                    </v-icon>
+                  </template>
+                </v-data-table>
+              </v-card>
+            </v-dialog>
+
+            <v-dialog
+              max-width="300"
+              v-model="dialog"
+            >
+              <v-card>
+                <v-form
+                  v-model="valid"
+                >
+                  <v-card-text>
+                    <v-container>
+                        <v-text-field
+                          v-model="specName"
+                          label="规格名称"
+                          :rules="nameRules"
+                        ></v-text-field>
+                        <v-text-field
+                          v-model="specPrice"
+                          :rules="priceRules"
+                          label="价格"
+                        ></v-text-field>
+                    </v-container>
+                  </v-card-text>
+
+                  <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
-                      color="primary"
-                      @click="dialog = true"
+                      color="blue darken-1"
+                      text
+                      @click="dialog = false"
                     >
-                      新增规格
+                      取消
                     </v-btn>
-                  </v-toolbar>
-                </template>
+                    <v-btn
+                      color="blue darken-1"
+                      text
+                      :disabled="!valid"
+                      @click="save"
+                    >
+                      保存
+                    </v-btn>
+                  </v-card-actions>
+                </v-form>
+              </v-card>
+            </v-dialog>
 
-                <template v-slot:[`item.actions`]="{ item }">
-                  <v-icon @click="deleteSpec(item)">
-                    mdi-delete
-                  </v-icon>
-                </template>
-              </v-data-table>
-            </v-card>
-          </v-dialog>
-
-          <v-dialog
-            max-width="300"
-            v-model="dialog"
-          >
-            <v-card>
-              <v-form
-                v-model="valid"
-              >
-                <v-card-text>
-                  <v-container>
-                      <v-text-field
-                        v-model="specName"
-                        label="规格名称"
-                        :rules="nameRules"
-                      ></v-text-field>
-                      <v-text-field
-                        v-model="specPrice"
-                        :rules="priceRules"
-                        label="价格"
-                      ></v-text-field>
-                  </v-container>
-                </v-card-text>
-
+            <v-dialog v-model="isDeleteSpec" max-width="500px">
+              <v-card>
+                <v-card-title class="headline">确定删除该规格?</v-card-title>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn
-                    color="blue darken-1"
-                    text
-                    @click="dialog = false"
-                  >
-                    取消
-                  </v-btn>
-                  <v-btn
-                    color="blue darken-1"
-                    text
-                    :disabled="!valid"
-                    @click="save"
-                  >
-                    保存
-                  </v-btn>
+                  <v-btn color="blue darken-1" text @click="isDeleteSpec = false">取消</v-btn>
+                  <v-btn color="red" text @click="confirmDelete">确定</v-btn>
+                  <v-spacer></v-spacer>
                 </v-card-actions>
-              </v-form>
-            </v-card>
-          </v-dialog>
-
-          <v-dialog v-model="isDeleteSpec" max-width="500px">
-            <v-card>
-              <v-card-title class="headline">确定删除该规格?</v-card-title>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="isDeleteSpec = false">取消</v-btn>
-                <v-btn color="red" text @click="confirmDelete">确定</v-btn>
-                <v-spacer></v-spacer>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-toolbar>
-      </template>
-      
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-btn 
-          small
-          dark
-          class="mx-2"
-          @click="">
-        <v-icon
-          small
-          class="mr-2"
-        >
-          mdi-menu
-        </v-icon>
-        订单详情
-        </v-btn>
-      </template>
-    </v-data-table>
+              </v-card>
+            </v-dialog>
+          </v-toolbar>
+        </template>
+        
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-btn 
+            small
+            dark
+            class="mx-2"
+            @click="">
+          <v-icon
+            small
+            class="mr-2"
+          >
+            mdi-menu
+          </v-icon>
+          订单详情
+          </v-btn>
+        </template>
+      </v-data-table>
+      <div class="text-center">
+        <v-container class="max-width">
+          <v-pagination
+            v-model="curPage"
+            :length="totalPages"
+            @input=""
+          ></v-pagination>
+        </v-container>
+      </div>
+    </div>
     <router-view v-else></router-view>
   </div>
 </template>
 
 <script>
   import { H_config } from '../../../../network/config';
+  import {
+    getAllCampus
+  } from '../../../../network/work';
   import {
     getExpressSpec,
     setExpressSpec,
@@ -222,7 +294,7 @@
         specs: [],
         search: '',
         rule: [
-          v => /^[0-9]{6}$/.test(v) || '取件码必须为6位数字',
+          v => /^[0-9]{6, 8}$/.test(v) || '取件码必须为6~8位数字',
         ],
         nameRules: [
           v => !!v || '规格名不能为空'
@@ -240,10 +312,26 @@
         specName: '',
         specPrice: 0,
 
+        date: new Date().toISOString().substr(0, 10),
+        maxDate: new Date().toISOString().substr(0, 10),
+        campus: [],
+        campusSelectValue: '',
+        curPage: 1,
+        totalPages: 1,
+        topManager: localStorage.getItem('campusAddress') === '管理员',
+        ggCampusSelectValue: ''
       }
     },
     components: {
       toast
+    },
+    mounted() {
+      this.topManager && getAllCampus().then(res => {
+        if(res.code === H_config.STATECODE_SUCCESS) {
+          this.campus.push(...res.data.map(item => item.campusName))
+          this.ggCampusSelectValue = this.campus[0]
+        }
+      })
     },
     methods: {
       // _getOrderByOrderNum() {
@@ -266,8 +354,9 @@
       //   this.$router.push('searchOrder/orderDetails')
       // },
       getSpec() {
-        getExpressSpec().then(res => {
-          console.log(res);
+        getExpressSpec({
+          campus: this.ggCampusSelectValue
+        }).then(res => {
           if(res.code === H_config.STATECODE_express_SUCCESS) {
             this.specs = res.data
             this.specDialog = true
@@ -279,7 +368,8 @@
       save() {
         const expressAgentPrice = JSON.stringify({
           specifications: this.specName,
-          price: Number(this.specPrice)
+          price: Number(this.specPrice),
+          campus: this.ggCampusSelectValue
         })
         setExpressSpec(expressAgentPrice).then(res => {
           console.log(res);

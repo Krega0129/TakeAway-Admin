@@ -12,7 +12,7 @@
       hide-default-footer
       hide-default-header
       item-key="infoName"
-      :loading="loading"
+      :loading="loadingName === 'infoLoading'"
       loading-text="加载中...请稍后"
     >
       <template v-slot:top>
@@ -31,6 +31,13 @@
           </v-dialog>
           <v-spacer></v-spacer>
           <v-btn
+            color="primary"
+            class="mr-5"
+            @click="_getOrderHistory"
+          >
+            接单历史
+          </v-btn>
+          <v-btn
             dark
             @click="_getRiderLicense"
           >
@@ -45,6 +52,38 @@
                   max-height="200px" 
                   :src="BASE_URL + '/' + item.url"
                   @click="$refs.img.scaleImg(BASE_URL + '/' + item.url)"></v-img>
+              </div>
+            </v-card>
+          </v-dialog>
+          <v-dialog v-model="orderHistoryDialog" max-width="800px">
+            <v-card>
+              <v-card-title>接单历史</v-card-title>
+              <v-data-table
+                :headers="orderHeaders"
+                :items="orderHistory"
+                class="elevation-1"
+                no-data-text="没有数据"
+                hide-default-footer
+                item-key="infoName"
+                :loading="loadingName === 'orderLoading'"
+                loading-text="加载中...请稍后"
+              >
+
+              </v-data-table>
+              <div class="text-center">
+                <v-container>
+                  <v-row justify="center">
+                    <v-col cols="6">
+                      <v-container class="max-width">
+                        <v-pagination
+                          v-model="curPage"
+                          :length="totalPages"
+                          @input=""
+                        ></v-pagination>
+                      </v-container>
+                    </v-col>
+                  </v-row>
+                </v-container>
               </div>
             </v-card>
           </v-dialog>
@@ -69,7 +108,8 @@
   import {
     getRiderInfo,
     updateReviewStatus,
-    selectById
+    selectById,
+    selectRiderOrderInfoByDate
   } from '../../../../network/rider';
   import toast from '../../../../components/toast';
   import imgDialog from '../../../../components/imgDialog';
@@ -93,6 +133,34 @@
             value: 'infoValue',
           }
         ],
+        orderHeaders: [
+          {
+            text: '用户',
+            align: 'center',
+            sortable: false,
+            value: 'userName',
+          },
+          {
+            text: '订单编号',
+            align: 'center',
+            sortable: false,
+            value: 'orderNumber'
+          },
+          {
+            text: '下单时间',
+            align: 'center',
+            sortable: false,
+            value: 'completeTime'
+          },
+          {
+            text: '查看详情',
+            align: 'center',
+            sortable: false,
+            width: 200,
+            value: 'actions'
+          }
+        ],
+        orderHistory: [],
         riderInfo: [],
         riderName: '骑手姓名',
         riderStatus: null,
@@ -101,7 +169,13 @@
         LicenseKeys: ['studentCard', 'schoolCard', 'driverIdcardFront', 'driverIdcardBehind'],
         showLicense: false,
         license: [],
-        loading: true
+        loadingName: 'infoLoading',
+        orderHistoryDialog: false,
+        curPage: 1,
+        totalPages: 1,
+        disable: true,
+        date: new Date().toISOString().substr(0, 10),
+        maxDate: new Date().toISOString().substr(0, 10),
       }
     },
     components: {
@@ -140,7 +214,7 @@
         } else {
           this.$refs.toast.setAlert(res.msg, 'error')
         }
-        this.loading = false
+        this.loadingName = ''
       })
     },
     methods: {
@@ -191,6 +265,15 @@
           } else {
             this.$refs.toast.setAlert('网络异常', 'error')
           }
+        })
+      },
+      _getOrderHistory() {
+        this.orderHistoryDialog = true
+        selectRiderOrderInfoByDate({
+          date: '2020-07-25',
+          riderId: this.$store.state.riderId
+        }).then(res => {
+          console.log(res);
         })
       }
     }

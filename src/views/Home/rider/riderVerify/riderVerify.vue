@@ -31,6 +31,7 @@
           <v-spacer></v-spacer>
 
           <v-select
+            v-if="$store.state.topManager"
             dense
             class="mt-6 mr-5"
             :items="campus"
@@ -88,6 +89,10 @@
             </v-card>
           </v-dialog>
         </v-toolbar>
+      </template>
+
+      <template v-slot:[`item.driverIdentity`]="{ item }">
+        {{item.driverStatus == 1 ? '外卖骑手' : '快递骑手'}}
       </template>
       
       <template v-slot:[`item.actions`]="{ item }">
@@ -161,6 +166,12 @@
             value: 'driverName'
           },
           {
+            text: '类别',
+            align: 'start',
+            sortable: false,
+            value: 'driverIdentity'
+          },
+          {
             text: '骑手电话',
             align: 'start',
             sortable: false,
@@ -214,7 +225,6 @@
     },
     watch: {
       selectCampusVal() {
-        this.selectCampusVal = this.selectCampusVal == '全部校区' ? '' : this.selectCampusVal
         this.loading = true
         this._getRiderByStatus()
       },
@@ -234,7 +244,7 @@
       _getRiderByStatus() {
         getRiderByStatus({
           driverStatus: this.status.indexOf(this.selectStatusVal),
-          campusName: this.selectCampusVal
+          campusName: localStorage.getItem('campusAddress') === '管理员' ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress')
         }).then(res => {
           if(res.code === H_config.STATECODE_rider_SUCCESS) {
             this.riders = res.data

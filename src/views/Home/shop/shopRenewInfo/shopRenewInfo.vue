@@ -43,6 +43,17 @@
 
           <v-spacer></v-spacer>
 
+          <v-select
+            v-if="$store.state.topManager"
+            dense
+            class="mt-6"
+            :items="campus"
+            style="width: 30px"
+            label="全部校区"
+            v-model="campusSelectVal"
+            solo
+          ></v-select>
+
           <!-- <v-btn
             dark
             class="ma-2"
@@ -120,6 +131,9 @@
     reviewDetails,
     auditShopUpdate
   } from '../../../../network/shop'
+  import {
+    getAllCampus
+  } from '../../../../network/work';
   import toast from '../../../../components/toast';
   import { H_config } from '../../../../network/config';
 
@@ -165,7 +179,9 @@
         shopList: [],
         statusSelectVal: '未审核',
         statusSelectIndex: 0,
-        loading: true
+        loading: true,
+        campus: ['全部校区'],
+        campusSelectVal: ''
       }
     },
     components: {
@@ -173,6 +189,11 @@
     },
     mounted() {
       this._reviewDetails()
+      getAllCampus().then(res => {
+        if(res.code == H_config.STATECODE_campus_SUCCESS) {
+          this.campus = ['全部校区', ...res.data.map(item => item.campusName)]
+        }
+      })
     },
     watch: {
       selected (val) {
@@ -188,6 +209,10 @@
         this.statusSelectIndex = this.selectItem.indexOf(val)
         this.loading = true
         this._reviewDetails()
+      },
+      campusSelectVal() {
+        this._reviewDetails()
+        this.loading = true
       }
     },
     methods: {
@@ -200,7 +225,8 @@
       },
       _reviewDetails() {
         reviewDetails({
-          auditStatus: this.statusSelectIndex
+          auditStatus: this.statusSelectIndex,
+          address: localStorage.getItem('campusAddress')
         }).then(res => {
           if(res.code == H_config.STATECODE_get_SUCCESS) {
             this.desserts = []
@@ -216,6 +242,7 @@
           this.loading = false
         })
       },
+
       // 详情
       editItem (item) {
         // 获取索引

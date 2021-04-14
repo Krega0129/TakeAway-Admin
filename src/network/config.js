@@ -1,4 +1,6 @@
 const BASE_URL = 'https://www.lizeqiang.top:8888'
+// const BASE_URL = 'https://192.168.1.106:8888'
+// const BASE_URL = 'https://www.sijie666.com:8080'
 
 const H_config = {}
 
@@ -23,7 +25,7 @@ H_config.STATECODE_updatePhoto_NULL_FAILED = 1516   // 文件为空
 H_config.STATECODE_updatePhoto_TYPE_FAILED = 1517   // 文件类型错误
 H_config.STATECODE_updatePhoto_FAILED = 1518        // 文件上传失败
 
-H_config.API_selectPhotos_URL = '/managerInfo/selectPhotos'
+H_config.API_selectPhotos_URL = '/managerInfo/selectPhotos'+
 H_config.API_deletePhoto_URL = '/managerInfo/deletePhoto'
 H_config.STATECODE_selectPhotos_NULL_FAILED = 1500   // 参数为空（删除图片适用）
 // 根据订单编号查询订单
@@ -32,11 +34,28 @@ H_config.STATECODE_getOrderByOrderNum_SUCCESS = 3208
 H_config.STATECODE_getOrderByOrderNum_FAILED = 3555
 // 获取当前抽成比
 H_config.API_getNewestTakePercentage_URL = '/profit/selectNewest'
+H_config.API_getNewestTakePercentageByCampus_URL = '/profit/selectNewestByCampusName'
 // 设置抽成比
 H_config.API_setTakePercentage_URL = '/profit/insert'
 H_config.STATECODE_takePercentage_SUCCESS = 3200
 // 获取抽成修改记录
 H_config.API_getProfitHistory_URL = '/profit/selectAll'
+// 获取校区公告
+H_config.API_getNotice_URL = '/manager/getNotice'
+// 设置校区公告
+H_config.API_setNotice_URL = '/manager/setNotice'
+// 设置提示
+H_config.API_setTip_URL = '/manager/setTip'
+// 获取投诉列表
+H_config.API_getAdvice_URL = '/manager/getAdvise'
+// 获取所有外卖订单
+H_config.API_selectAllOrder_URL = '/order/selectAllOrder'
+// 根据骑手id查询订单列表
+H_config.API_selectRiderOrderInfoByDate_URL = '/order/selectRiderOrderInfoByDate'
+// 获取快递订单
+H_config.API_listAllOrder_URL = '/expressAgent/listAllOrder'
+// 根据订单编号获取快递订单信息
+H_config.API_selectOrderByOrderNumber_URL = '/expressAgent/selectOrderByOrderNumber'
 
 // 店铺
 H_config.STATECODE_get_SUCCESS = 1200 // 查询成功
@@ -100,6 +119,16 @@ H_config.API_deleteSpec_URL = '/expressAgent/deletePriceById'
 H_config.API_setExpressSpec_URL = '/expressAgent/addNewExpressAgentPrice'
 H_config.STATECODE_setExpressSpec_SUCCESS = 3200
 
+
+// 登录
+H_config.API_login_URL = '/manager/login'
+H_config.STATECODE_SUCCESS = 3200
+
+H_config.API_getAllManagerAccount_URL = '/manager/getAccount'
+
+H_config.API_deleteManagerAccount_URL = '/manager/delAccount'
+
+H_config.API_addNewManagerAccount_URL = '/manager/setAccount'
 
 export {
   BASE_URL,

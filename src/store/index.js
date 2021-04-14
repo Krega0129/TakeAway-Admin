@@ -6,7 +6,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    account: '',
+    topManager: false,
 
     // shopList: [],
     currentShop: {},
@@ -25,7 +25,7 @@ export default new Vuex.Store({
   },
   mutations: {
     login(state, payload) {
-      state.account = payload
+      state.topManager = payload === '管理员'
     },
     changeShopInfo(state, payload){
       state.shopOldInfo = payload.shopOldInfo
