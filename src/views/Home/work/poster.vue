@@ -10,7 +10,7 @@
       <div></div>
       <v-spacer></v-spacer>
       <v-select
-        v-if="$store.state.topManager"
+        v-if="topManager"
         dense
         class="mt-6 mx-5"
         :items="campus"
@@ -182,20 +182,8 @@
     name: 'poster',
     data () {
       return {
-        posterURL: [
-          // {
-          //   photo: 'http://p1.meituan.net/codeman/826a5ed09dab49af658c34624d75491861404.jpg',
-          //   photoId: 1
-          // },
-          // {
-          //   photo: 'https://p1.meituan.net/travelcube/01d2ab1efac6e2b7adcfcdf57b8cb5481085686.png',
-          //   photoId: 2
-          // },
-          // {
-          //   photo: 'http://p0.meituan.net/codeman/a97baf515235f4c5a2b1323a741e577185048.jpg',
-          //   photoId: 3
-          // }
-        ],
+        topManager: localStorage.getItem('campusAddress') === '管理员',
+        posterURL: [],
         selected: [],
         dialog: false,
         newDialog: false,
@@ -213,18 +201,22 @@
       toast
     },
     async mounted() {
-      await getAllCampus().then(res => {
-        if(res.code == H_config.STATECODE_campus_SUCCESS) {
-          this.campusList = res.data
-          this.campusSelectVal = this.campusList[0].campusName || ''
-          this.campus = []
-          for(let school of this.campusList) {
-            this.campus.push(school.campusName)
+      if(this.topManager) {
+        await getAllCampus().then(res => {
+          if(res.code == H_config.STATECODE_campus_SUCCESS) {
+            this.campusList = res.data
+            this.campusSelectVal = this.campusList[0].campusName || ''
+            this.campus = []
+            for(let school of this.campusList) {
+              this.campus.push(school.campusName)
+            }
+            this.campusSelectVal = this.campus[0]
+          } else {
+            this.$refs.toast.setAlert('网络异常', 'error')
           }
-        } else {
-          this.$refs.toast.setAlert('网络异常', 'error')
-        }
-      })
+        })
+      }
+      this._getAllPosters()
     },
     watch: {
       campusSelectVal(val) {
@@ -239,7 +231,8 @@
     methods: {
       _getAllPosters() {
         selectPhotos({
-          campusId: this.campusList[this.campusSelectIndex].campusId
+          // campusId: this.campusList[this.campusSelectIndex].campusId
+          campus: this.topManager ? this.campusSelectVal : localStorage.getItem('campusAddress')
         }).then(res => {
           if(res.code == H_config.STATECODE_get_SUCCESS) {
             this.posterURL = res.data

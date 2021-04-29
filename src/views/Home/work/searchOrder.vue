@@ -195,9 +195,11 @@
     methods: {
       _getOrderByOrderNum() {
         getOrderByOrderNum({
-          orderNumber: this.search
+          orderNumber: this.search,
+          campus: this.topManager ? '' : localStorage.getItem('campusAddress')
         }).then(res => {
           if(res.code === H_config.STATECODE_getOrderByOrderNum_SUCCESS) {
+            console.log(res);
             this.orders = []
             this.orders.push(res.data)
             this.$refs.toast.setAlert('查询成功')

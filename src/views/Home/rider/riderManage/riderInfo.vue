@@ -57,34 +57,64 @@
           </v-dialog>
           <v-dialog v-model="orderHistoryDialog" max-width="800px">
             <v-card>
-              <v-card-title>接单历史</v-card-title>
+              <v-toolbar flat>
+                <v-card-title>接单历史</v-card-title>
+                <v-spacer></v-spacer>
+                <v-dialog
+                  ref="dialog"
+                  v-model="modal"
+                  :return-value.sync="date"
+                  width="290px"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="date"
+                      label="选择指定日期"
+                      prepend-icon="mdi-calendar"
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                      class="mt-10"
+                      style="max-width: 15vw"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="date"
+                    :max="maxDate"
+                    scrollable
+                  >
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      text
+                      color="primary"
+                      @click="_selectRiderOrderInfoByDate"
+                    >
+                      确定
+                    </v-btn>
+                  </v-date-picker>
+                </v-dialog>
+              </v-toolbar>
               <v-data-table
                 :headers="orderHeaders"
                 :items="orderHistory"
                 class="elevation-1"
+                fixed-header
+                style="max-height: 60vh"
                 no-data-text="没有数据"
-                hide-default-footer
                 item-key="infoName"
                 :loading="loadingName === 'orderLoading'"
                 loading-text="加载中...请稍后"
               >
-
+                <template v-slot:[`item.actions`]="{ item }">
+                  <v-btn
+                    dense
+                    color="primary"
+                    @click="checkDetails(item)"
+                  >
+                    查看详情
+                  </v-btn>
+                </template>
               </v-data-table>
-              <div class="text-center">
-                <v-container>
-                  <v-row justify="center">
-                    <v-col cols="6">
-                      <v-container class="max-width">
-                        <v-pagination
-                          v-model="curPage"
-                          :length="totalPages"
-                          @input=""
-                        ></v-pagination>
-                      </v-container>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </div>
             </v-card>
           </v-dialog>
         </v-toolbar>
@@ -171,11 +201,9 @@
         license: [],
         loadingName: 'infoLoading',
         orderHistoryDialog: false,
-        curPage: 1,
-        totalPages: 1,
-        disable: true,
         date: new Date().toISOString().substr(0, 10),
         maxDate: new Date().toISOString().substr(0, 10),
+        modal: false
       }
     },
     components: {
@@ -269,12 +297,24 @@
       },
       _getOrderHistory() {
         this.orderHistoryDialog = true
+        this._selectRiderOrderInfoByDate()
+      },
+      _selectRiderOrderInfoByDate() {
+        this.loadingName = 'orderLoading'
+        this.$refs.dialog && this.$refs.dialog.save(this.date)
         selectRiderOrderInfoByDate({
-          date: '2020-07-25',
+          date: this.date,
           riderId: this.$store.state.riderId
         }).then(res => {
-          console.log(res);
+          this.loadingName = ''
+          if(res.code === 3208) {
+            this.orderHistory = res.data
+          }
         })
+      },
+      checkDetails(item) {
+        this.$store.commit('updateOrder', item)
+        this.$router.push('/admin/searchOrder/orderDetails')
       }
     }
   }

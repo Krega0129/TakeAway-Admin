@@ -44,13 +44,14 @@
           <v-spacer></v-spacer>
 
           <v-select
-            v-if="$store.state.topManager"
+            v-if="topManager"
             dense
             class="mt-6"
             :items="campus"
             style="width: 30px"
             label="全部校区"
-            v-model="campusSelectVal"
+            @change="_reviewDetails"
+            v-model="selectCampusVal"
             solo
           ></v-select>
 
@@ -140,6 +141,7 @@
   export default {
     data () {
       return {
+        topManager: localStorage.getItem('campusAddress') === '管理员',
         // 已经选择的数据
         selected: [],
         // 单选
@@ -181,19 +183,19 @@
         statusSelectIndex: 0,
         loading: true,
         campus: ['全部校区'],
-        campusSelectVal: ''
+        selectCampusVal: '全部校区'
       }
     },
     components: {
       toast,
     },
-    mounted() {
-      this._reviewDetails()
-      getAllCampus().then(res => {
+    async mounted() {
+      this.topManager && await getAllCampus().then(res => {
         if(res.code == H_config.STATECODE_campus_SUCCESS) {
           this.campus = ['全部校区', ...res.data.map(item => item.campusName)]
         }
       })
+      this._reviewDetails()
     },
     watch: {
       selected (val) {
@@ -226,7 +228,7 @@
       _reviewDetails() {
         reviewDetails({
           auditStatus: this.statusSelectIndex,
-          address: localStorage.getItem('campusAddress')
+          address: this.topManager ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress')
         }).then(res => {
           if(res.code == H_config.STATECODE_get_SUCCESS) {
             this.desserts = []

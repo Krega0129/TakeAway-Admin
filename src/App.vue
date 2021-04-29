@@ -18,6 +18,7 @@
       // window.addEventListener("beforeunload",()=>{
       //   sessionStorage.setItem("store",JSON.stringify(this.$store.state))
       // })
+      // document.getElementsByTagName('body')[0].style.zoom = 1 / window.devicePixelRatio
     }
   }
 </script>

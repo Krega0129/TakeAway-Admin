@@ -1,6 +1,7 @@
-const BASE_URL = 'https://www.lizeqiang.top:8888'
-// const BASE_URL = 'https://192.168.1.106:8888'
-// const BASE_URL = 'https://www.sijie666.com:8080'
+// const BASE_URL = 'https://www.lizeqiang.top:8888'
+// const BASE_URL = 'https://192.168.1.102:8080'
+// const BASE_URL = 'https://localhost:8080'
+const BASE_URL = 'https://www.sijie666.com:8080'
 
 const H_config = {}
 
@@ -25,7 +26,7 @@ H_config.STATECODE_updatePhoto_NULL_FAILED = 1516   // 文件为空
 H_config.STATECODE_updatePhoto_TYPE_FAILED = 1517   // 文件类型错误
 H_config.STATECODE_updatePhoto_FAILED = 1518        // 文件上传失败
 
-H_config.API_selectPhotos_URL = '/managerInfo/selectPhotos'+
+H_config.API_selectPhotos_URL = '/managerInfo/selectPhotos'
 H_config.API_deletePhoto_URL = '/managerInfo/deletePhoto'
 H_config.STATECODE_selectPhotos_NULL_FAILED = 1500   // 参数为空（删除图片适用）
 // 根据订单编号查询订单
@@ -44,6 +45,8 @@ H_config.API_getProfitHistory_URL = '/profit/selectAll'
 H_config.API_getNotice_URL = '/manager/getNotice'
 // 设置校区公告
 H_config.API_setNotice_URL = '/manager/setNotice'
+// 获取提示
+H_config.API_getTip_URL = '/manager/getTip'
 // 设置提示
 H_config.API_setTip_URL = '/manager/setTip'
 // 获取投诉列表

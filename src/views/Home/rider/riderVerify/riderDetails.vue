@@ -20,7 +20,7 @@
           <v-toolbar-title>{{riderName}}</v-toolbar-title>
           <v-dialog v-model="dialog" max-width="500px">
             <v-card>
-              <v-card-title class="headline">确定{{status == 1 ? '通过' : '不通过'}}该骑手的信息?</v-card-title>
+              <v-card-title class="headline">确定{{status === 2551 ? '通过' : '不通过'}}该骑手的信息?</v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="closeDialog">取消</v-btn>
@@ -43,28 +43,28 @@
       </template>
 
     </v-data-table>
-    <div class="text-center mt-4" v-if="$store.state.riderStatus === 0">
+    <div class="text-center mt-4" v-if="$store.state.riderStatus === 2550">
       <v-btn
         large
         color="error"
         class="mx-2"
-        @click="openDialog(2)"
+        @click="openDialog(2552)"
       >
         审核不通过
       </v-btn>
       <v-btn
         large
         color="success"
-        @click="openDialog(1)"
+        @click="openDialog(2551)"
         class="mx-2"
       >
         审核通过
       </v-btn>
     </div>
-    <div class="text-center mt-4 green--text" v-else-if="$store.state.riderStatus == 1">
+    <div class="text-center mt-4 green--text" v-else-if="$store.state.riderStatus == 2551">
       审核已通过
     </div>
-    <div class="text-center mt-4 red--text" v-if="$store.state.riderStatus == 2">
+    <div class="text-center mt-4 red--text" v-if="$store.state.riderStatus == 2552">
       审核未通过
     </div>
   </div>
@@ -137,10 +137,10 @@ export default {
     _updateReviewStatus() {
       updateReviewStatus({
         driverId: this.$store.state.riderId,
-        driverStatus: this.status == 3 ? 1 : 3
+        driverStatus: this.status == 2553 ? 2551 : 2553
       }).then(res => {
         if(res.code == H_config.STATECODE_rider_SUCCESS) {
-          this.state = this.status == 3 ? 1 : 3
+          this.state = this.status == 2553 ? 2551 : 2553
           this.$store.commit('updateRiderStatus', this.status)
           this.$refs.toast.setAlert('修改成功')
           this.$bus.$emit('changeRiderReviewStatus', this.$store.state.riderId)

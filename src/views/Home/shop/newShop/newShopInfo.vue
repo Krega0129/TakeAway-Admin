@@ -32,10 +32,27 @@
           @click="$refs.img.scaleImg(BASE_URL + '/' + item.infoValue)"
           :src="BASE_URL + '/' + item.infoValue"
         ></v-img>
+        <v-btn 
+          v-else-if="item.InfoName == '商铺证件'"
+          @click="showLicense = true"  
+          color="primary"
+        >查看证件</v-btn>
         <div v-else>{{item.infoValue}}</div>
       </template>
 
     </v-data-table>
+    <v-dialog v-model="showLicense" max-width="800px">
+      <v-card class="d-flex justify-space-between flex-wrap pa-5">
+        <div class="text-center my-2" v-for="item in license" :key="item.url">
+          <div>{{item.name}}</div>
+          <v-img 
+            max-width="200px" 
+            max-height="200px" 
+            :src="BASE_URL + '/' + item.url"
+            @click="$refs.img.scaleImg(BASE_URL + '/' + item.url)"></v-img>
+        </div>
+      </v-card>
+    </v-dialog>
     <div class="text-center mt-4" v-if="$store.state.shopReviewStatus == 0">
       <v-btn
         large
@@ -67,7 +84,11 @@
   import toast from '../../../../components/toast';
   import imgDialog from '../../../../components/imgDialog';
   import { BASE_URL, H_config } from '../../../../network/config';
-  import { reviewNewShop } from '../../../../network/shop'
+  import { 
+    reviewNewShop,
+    shopIdGetShop,
+    shopIdGetShopLicense
+    } from '../../../../network/shop'
 
   export default {
     name: 'newShopInfo',
@@ -91,27 +112,67 @@
         shopInfo: [],
         flag: '',
         BASE_URL: BASE_URL,
-        keys: ['campusAddress', 'contactPhone', 'detailAddress', 'shopCategory', 'shopHead', 'shopIntroduce', 'shopName'],
+        keys: ['campusAddress', 'businessName', 'contactPhone', 'detailAddress', 'shopCategory', 'shopHead', 'shopIntroduce', 'shopName', 'shopLicense'],
+        license: [],
+        showLicense: false,
+        LicenseKeys: ['busLicense', 'restLicense', 'cardFront', 'cardBack', 'shopIn', 'shopOut']
       }
     },
     components: {
       toast,
       imgDialog
     },
-    mounted() {
+    async mounted() {
       let shop = this.$store.state.currentShop
+
+      await shopIdGetShop({
+        shopId: shop.shopId
+      }).then(res => {
+        if(res.code === 1200) {
+          shop = Object.assign(shop, res.data)
+        }
+      })
+
+      await shopIdGetShopLicense({
+        shopId: shop.shopId
+      }).then(res => {
+        if(res.code === 1200) {
+          this.license = []
+          const shop = res.data
+          let keys = Object.keys(shop)
+          for(let i in keys) {
+            if(this.LicenseKeys.indexOf(keys[i]) !== -1) {
+              let shopLicense = {}
+              switch(keys[i]) {
+                case 'busLicense': shopLicense.name = '营业执照'; break;
+                case 'restLicense': shopLicense.name = '餐饮许可证'; break;
+                case 'cardFront': shopLicense.name = '身份证正面'; break;
+                case 'cardBack': shopLicense.name = '身份证反面'; break;
+                case 'shopIn': shopLicense.name = '店铺内部'; break;
+                case 'shopOut': shopLicense.name = '店铺外部'; break;
+              }
+              shopLicense.url = shop[keys[i]]
+              this.license.push(shopLicense)
+            }
+          }
+        }
+      })
+
       let keys = Object.keys(shop)
+      keys.push('shopLicense')
       for(let i in keys) {
         if(this.keys.indexOf(keys[i]) != -1) {
           let shopInfo = {}
           switch(keys[i]) {
             case 'campusAddress': shopInfo.InfoName = '校区'; break;
+            case 'businessName': shopInfo.InfoName = '店主姓名'; break;
             case 'contactPhone': shopInfo.InfoName = '联系电话'; break;
             case 'detailAddress': shopInfo.InfoName = '详细地址'; break;
             case 'shopCategory': shopInfo.InfoName = '店铺分类'; break;
             case 'shopHead': shopInfo.InfoName = '店铺头像'; break;
             case 'shopIntroduce': shopInfo.InfoName = '商铺简介'; break;
             case 'shopName': shopInfo.InfoName = '商铺名称'; break;
+            case 'shopLicense': shopInfo.InfoName = '商铺证件'; break;
           }
           shopInfo.infoValue = shop[keys[i]]
           this.shopInfo.push(shopInfo)

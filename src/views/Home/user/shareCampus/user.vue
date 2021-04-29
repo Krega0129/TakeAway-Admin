@@ -36,7 +36,7 @@
             ></v-select>
 
             <v-select
-              v-if="$store.state.topManager"
+              v-if="topManager"
               dense
               class="mt-6"
               :items="campus"
@@ -136,6 +136,7 @@
     name: 'user',
     data() {
       return {
+        topManager: localStorage.getItem('campusAddress') === '管理员',
         BASE_URL: BASE_URL,
         headers: [
           {
@@ -164,30 +165,10 @@
             value: 'actions'
           }
         ],
-        users: [
-          // {
-          //   userName: '啊强',
-          //   userAccount: '11111111111',
-          //   content: '啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
-          //   img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
-          // },
-          // {
-          //   userName: '啊龙',
-          //   userAccount: '11111111111',
-          //   content: 'asdhgakdgrgirtyrhhg',
-          //   img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
-          // },
-          // {
-          //   userName: '啊锴',
-          //   userAccount: '11111111111',
-          //   content: 'asdhgakdgrgirtyrhhg',
-          //   img: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3155998395,3600507640&fm=26&gp=0.jpg'
-          // }
-        ],
+        users: [],
         search: '',
         multiSelect: false,
         singleSelect: false,
-        // selected: [],
         status: ['未审核', '审核已通过', '审核未通过'],
         campus: ['全部校区'],
         selectStatusVal: '未审核',
@@ -204,7 +185,7 @@
       toast
     },
     async mounted() {
-      await getAllCampus().then(res => {
+      this.topManager && await getAllCampus().then(res => {
         if(res && res.code == H_config.STATECODE_campus_SUCCESS) {
           let campusList = res.data
           for(let campus of campusList) {
@@ -249,12 +230,6 @@
         this.$store.commit('updateShareCampus', item)
         this.$router.push('shareCampus/reviewShareCampus')
       },
-      // reviewMultiPass() {
-      //   console.log('批量通过');
-      // },
-      // reviewMultiOut() {
-      //   console.log('批量淘汰');
-      // }
       _getShareSchoolByStatus() {
         getShareSchoolByStatus({
           auditStatus: this.selectStatusIndex,
@@ -265,7 +240,7 @@
           if(res && res.code && res.code === H_config.STATECODE_getShareSchoolByStatus_SUCCESS) {
             this.loading = false
             this.page = res.data.pageNum
-            this.totalPages = res.data.pages
+            this.totalPages = res.data.pages || 1
             this.records = res.data.list
           } else {
             this.$refs.toast.setAlert('加载失败', 'error')

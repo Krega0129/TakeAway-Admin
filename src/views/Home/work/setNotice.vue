@@ -30,7 +30,7 @@
         </v-btn>
       </v-col>
     </v-row>
-    <v-row v-if="!topManager">
+    <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="7">
         <v-textarea
@@ -43,13 +43,13 @@
         <v-btn
           color="primary"
           class="mt-7"
-          @click="_setTip(0)"
+          @click="_setTip('business')"
         >
           确定
         </v-btn>
       </v-col>
     </v-row>
-    <v-row v-if="!topManager">
+    <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="7">
         <v-textarea
@@ -62,7 +62,7 @@
         <v-btn
           color="primary"
           class="mt-7"
-          @click="_setTip(1)"
+          @click="_setTip('drive')"
         >
           确定
         </v-btn>
@@ -77,6 +77,7 @@
     getAllCampus,
     getNotice,
     setNotice,
+    getTip,
     setTip
   } from '../../../network/work';
   import {
@@ -107,11 +108,13 @@ export default {
     })
 
     this._getNotice()
+    this._getTip('business')
+    this._getTip('drive')
   },
   methods: {
     _setNotice() {
       setNotice({
-        address: this.campusSelectValue,
+        address: this.topManager ? this.campusSelectValue : localStorage.getItem('campusAddress'),
         notice: this.notice
       }).then(res => {
         if(res.code === 3200) {
@@ -123,7 +126,7 @@ export default {
     },
     _getNotice() {
       getNotice({
-        address: this.campusSelectValue
+        address: this.topManager ? this.campusSelectValue : localStorage.getItem('campusAddress'),
       }).then(res => {
         if(res.code === 3200) {
           this.notice = res.data?.noticeInfo
@@ -132,12 +135,35 @@ export default {
     },
     _setTip(type) {
       setTip({
-        tip: type === '' ? this.shopTip : this.riderTip,
-        type: ''
+        tip: type === 'business' ? this.shopTip : this.riderTip,
+        type: type,
+        address: this.topManager ? this.campusSelectValue : localStorage.getItem('campusAddress'),
       }).then(res => {
-        console.log(res);
+        if(res.code === 3200) {
+          this.$refs.toast.setAlert('设置成功')
+        } else {
+          this.$refs.toast.setAlert('设置失败', 'error')
+        }
       })
-    }
+    },
+    _getTip(type) {
+      getTip({
+        type: type,
+        address: this.topManager ? this.campusSelectValue : localStorage.getItem('campusAddress')
+      }).then(res => {
+        if(res.code === 3200) {
+          switch(type) {
+            case 'drive': 
+              this.riderTip = res.data
+            case 'business':
+              this.shopTip = res.data
+              break;
+          }
+        } else {
+          this.$refs.toast.setAlert('加载失败', 'error')
+        }
+      })
+    },
   }
 }
 </script>

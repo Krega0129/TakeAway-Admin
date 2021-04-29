@@ -32,7 +32,7 @@
           <v-spacer></v-spacer>
 
           <v-select
-            v-if="$store.state.topManager"
+            v-if="topManager"
             dense
             class="mt-6"
             :items="campus"
@@ -151,6 +151,7 @@
     name: 'shopList',
     data() {
       return {
+        topManager: localStorage.getItem('campusAddress') === '管理员',
         headers: [
           {
             text: '商铺名',
@@ -189,8 +190,8 @@
     components: {
       toast
     },
-    mounted() {
-      getAllCampus().then(res => {
+    async mounted() {
+      this.topManager && await getAllCampus().then(res => {
         if(res.code == H_config.STATECODE_campus_SUCCESS) {
           for(let school of res.data) {
             this.campus.push(school.campusName)
@@ -217,7 +218,7 @@
       },
       _getShop() {
         getShop({
-          address: localStorage.getItem('campusAddress') === '管理员' ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress')
+          address: this.topManager ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress')
         }).then(res => {
           if(res.code == H_config.STATECODE_get_SUCCESS) {
             this.shop = res.data

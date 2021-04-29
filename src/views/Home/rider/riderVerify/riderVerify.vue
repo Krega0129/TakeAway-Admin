@@ -31,7 +31,7 @@
           <v-spacer></v-spacer>
 
           <v-select
-            v-if="$store.state.topManager"
+            v-if="topManager"
             dense
             class="mt-6 mr-5"
             :items="campus"
@@ -79,7 +79,7 @@
 
           <v-dialog v-model="reviewRider" max-width="500px">
             <v-card>
-              <v-card-title class="headline">确定{{toStatus === 1 ? '': '不'}}通过审核?</v-card-title>
+              <v-card-title class="headline">确定{{toStatus === 2551 ? '': '不'}}通过审核?</v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="closeDialog">取消</v-btn>
@@ -92,7 +92,7 @@
       </template>
 
       <template v-slot:[`item.driverIdentity`]="{ item }">
-        {{item.driverStatus == 1 ? '外卖骑手' : '快递骑手'}}
+        {{item.driverIdentity == 1 ? '外卖骑手' : '快递骑手'}}
       </template>
       
       <template v-slot:[`item.actions`]="{ item }">
@@ -113,8 +113,8 @@
           small
           color="success"
           class="mx-2"
-          v-if="selectStatusVal == '待审核'"
-          @click="openDialog(item, 1)">
+          v-if="selectStatusVal === '待审核'"
+          @click="openDialog(item, 2551)">
         <v-icon
           small
           class="mr-2"
@@ -126,9 +126,9 @@
         <v-btn 
           small
           color="error"
-          v-if="selectStatusVal == '待审核'"
+          v-if="selectStatusVal === '待审核'"
           class="mx-2"
-          @click="openDialog(item, 2)">
+          @click="openDialog(item, 2552)">
         <v-icon
           small
           class="mr-2"
@@ -158,6 +158,7 @@
     name: 'riderVerify',
     data() {
       return {
+        topManager: localStorage.getItem('campusAddress') === '管理员',
         headers: [
           {
             text: '骑手姓名',
@@ -205,7 +206,7 @@
       toast
     },
     async mounted() {
-      await getAllCampus().then(res => {
+      this.topManager && await getAllCampus().then(res => {
         if(res.code == H_config.STATECODE_campus_SUCCESS) {
           for(let school of res.data) {
             this.campus.push(school.campusName)
@@ -243,8 +244,8 @@
       },
       _getRiderByStatus() {
         getRiderByStatus({
-          driverStatus: this.status.indexOf(this.selectStatusVal),
-          campusName: localStorage.getItem('campusAddress') === '管理员' ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress')
+          driverStatus: this.status.indexOf(this.selectStatusVal) + 2550,
+          campusName: this.topManager ? this.selectCampusVal == '全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress')
         }).then(res => {
           if(res.code === H_config.STATECODE_rider_SUCCESS) {
             this.riders = res.data

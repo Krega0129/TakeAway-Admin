@@ -284,9 +284,22 @@ export function setTip(data) {
   })
 }
 
-export function getAdvice() {
+// 获取入驻提示
+export function getTip(data) {
   return axios({
-    url: H_config.API_getAdvice_URL
+    method: 'post',
+    url: H_config.API_getTip_URL,
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+export function getAdvice(data) {
+  return axios({
+    url: H_config.API_getAdvice_URL,
+    params: data
   })
 }
 

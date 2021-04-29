@@ -1,5 +1,6 @@
 import originAxios from 'axios'
 import qs from 'qs'
+import router from '../router/index'
 import { BASE_URL } from './config'
 
 export default function axios(option) {
@@ -16,7 +17,10 @@ export default function axios(option) {
       // 1.当发送网络请求时, 在页面中添加一个loading组件, 作为动画
       // 2.某些请求要求用户必须登录, 判断用户是否有token, 如果没有token跳转到login页面
       const token = localStorage.getItem('takeAwayManage_TOKEN') || null
-      config.headers.token = token
+      if(typeof config.data == 'object' && Object.prototype.toString.call(config.data) !== '[object FormData]') {
+        config.data = {address: localStorage.getItem('campusAddress'), ...config.data}
+      }
+      config.headers.managerToken = token
       // 3.对请求的参数进行序列化(看服务器是否需要序列化)
       if (typeof config.data == 'object' && Object.prototype.toString.call(config.data) !== '[object FormData]' && JSON.stringify(config.data).indexOf('{') == 0) { //判断变量m是不是json对象
         config.data = qs.stringify(config.data)
@@ -29,7 +33,21 @@ export default function axios(option) {
 
     instance.interceptors.response.use(response => {
       // console.log('来到了response拦截success中');
-      return response.data
+      if(response.data.code === 400) {
+        router.replace({
+          path: '/login',
+          query: {redirect: router.currentRoute.fullPath}
+        })
+        // 清空所有缓存
+        localStorage.clear()
+        alert('身份验证出现问题，请重新登录！')
+        return {
+          code: -1,
+          msg: '身份验证出现问题，请重新登录！'
+        }
+      } else {
+        return response.data
+      }
     }, err => {
       console.log('来到了response拦截failure中');
       console.log(err);

@@ -21,7 +21,7 @@
       ></v-select>
       <v-spacer></v-spacer>
       <v-select
-        v-if="$store.state.topManager"
+        v-if="topManager"
         :items="campus"
         v-model="campusSelectValue"
         label="全部校区"
@@ -227,6 +227,7 @@
     name: 'money',
     data() {
       return {
+        topManager: localStorage.getItem('campusAddress') === '管理员',
         setTakePercentageDialog: false,
         time: ['7天内', '30天内', '一年内'],
         campus: ['全部校区'],
@@ -285,7 +286,7 @@
       toast
     },
     mounted() {
-      this.$store.state.topManager && getAllCampus().then(res => {
+      this.topManager && getAllCampus().then(res => {
         if(res.code === H_config.STATECODE_SUCCESS) {
           this.campus.push(...res.data.map(item => item.campusName))
         }

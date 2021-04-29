@@ -20,17 +20,20 @@
         v-model="account"
         :counter="10"
         :rules="accountRules"
+        @keydown="accountEnter($event)"
         label="管理员账号"
         required
       ></v-text-field>
 
       <v-text-field
+        ref="pwd"
         v-model="password"
         :append-icon="showPassW ? 'mdi-eye' : 'mdi-eye-off'"
         :rules="passwordRules"
         :type="showPassW ? 'text' : 'password'"
         label="密码"
         @click:append="showPassW = !showPassW"
+        @keydown="enter($event)"
         required
       ></v-text-field>
 
@@ -79,15 +82,6 @@ import { H_config } from '../network/config';
     methods: {
       validate () {
         this.$refs.form.validate()
-        // if(this.account == 'admin' && this.password === 'admin') {
-        //   localStorage.setItem('takeAwayManage_TOKEN', 11)
-        //   localStorage.setItem('account', this.account)
-        //   this.$store.commit('login', this.account)
-        //   this.$refs.toast.setAlert('登录成功')
-        //   this.$router.replace('/admin') 
-        // } else {
-        //   this.$refs.toast.setAlert('账号或密码错误', 'error')
-        // }
         login({
           account: this.account,
           password: this.password
@@ -102,6 +96,16 @@ import { H_config } from '../network/config';
             this.$refs.toast.setAlert('账号或密码错误', 'error')
           }
         })
+      },
+      enter(e) {
+        if(e.keyCode === 13) {
+          this.validate()
+        }
+      },
+      accountEnter(e) {
+        if(e.keyCode === 13) {
+          this.$refs.pwd.focus()
+        }
       }
     }
   }

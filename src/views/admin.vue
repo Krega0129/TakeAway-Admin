@@ -209,6 +209,7 @@
     name: 'admin',
     data() {
       return {
+        topManager: localStorage.getItem('campusAddress') === '管理员',
         drawer: true,
         items: [
           {
@@ -288,7 +289,6 @@
         ],
         title: '资金管理',
         campusAddress: localStorage.getItem('campusAddress'),
-        topManager: localStorage.getItem('campusAddress') === '管理员',
         accountManage: false,
         accountHeaders: [
           {
@@ -350,8 +350,8 @@
     },
     mounted() {
       this.title = this.$route.meta.title
-      this._getAllManagerAccount()
-      if(this.$store.state.topManager || localStorage.getItem('campusAddress') === '管理员') {
+      this.topManager && this._getAllManagerAccount()
+      if(this.topManager) {
         this.items[0].items.push({
           action: '设置校区',
           title: '设置校区',
@@ -367,11 +367,11 @@
           route: '/admin/advice'
         },)
       } else {
-        this.items[0].items.push({
-          action: '设置抽成比',
-          title: '设置抽成比',
-          route: '/admin/profit'
-        })
+        // this.items[0].items.push({
+        //   action: '设置抽成比',
+        //   title: '设置抽成比',
+        //   route: '/admin/profit'
+        // })
       }
     },
     watch: {

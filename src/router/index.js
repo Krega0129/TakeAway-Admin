@@ -28,7 +28,7 @@ const RiderInfo = () => import('@/views/Home/rider/riderManage/riderInfo');
 const User = () => import('@/views/Home/user/shareCampus/user');
 const ReviewUser = () => import('@/views/Home/user/shareCampus/reviewUser')
 const Express = () => import('@/views/Home/user/express/express')
-const ExpressDetails = () => ('@//views/Home/user/express/expressDetails')
+const ExpressDetails = () => import('@/views/Home/user/express/expressDetails')
 
 Vue.use(VueRouter)
 
@@ -243,6 +243,14 @@ const router = new VueRouter({
   mode: 'hash',
   base: process.env.BASE_URL,
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  if(!localStorage.getItem('takeAwayManage_TOKEN') && to.fullPath !== '/login') {
+    next('/login')
+  } else {
+    next()
+  }
 })
 
 export default router

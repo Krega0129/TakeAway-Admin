@@ -161,6 +161,7 @@
           ids: this.updateId
         }).then(res => {
           if(res.code === H_config.STATECODE_review_SUCCESS) {
+            this.passReview = false
             this.$refs.toast.setAlert('修改成功')
             setTimeout(() => {
               this.$router.go(-1)

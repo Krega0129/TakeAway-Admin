@@ -24,13 +24,13 @@
                 v-model="search"
                 append-icon="mdi-magnify"
                 :rules="rule"
-                label="输入取件码"
+                label="输入订单号"
                 class="mt-6"
               ></v-text-field>
               <v-btn
                 color="primary"
                 class="ml-5 mt-6"
-                @click=""
+                @click="_selectOrderByOrderNumber"
                 :disabled="!disable"
               >
                 搜索
@@ -45,6 +45,7 @@
               :label="campus[0]"
               dense
               solo
+              @change="_listAllOrder"
               class="mt-7"
               style="max-width: 15vw"
             ></v-select>
@@ -75,7 +76,7 @@
                 <v-btn
                   text
                   color="primary"
-                  @click="$refs.dialog.save(date)"
+                  @click="changeDate"
                 >
                   确定
                 </v-btn>
@@ -196,13 +197,27 @@
             </v-dialog>
           </v-toolbar>
         </template>
+
+        <template v-slot:[`header.status`]>
+          <v-select
+            style="width: 150px"
+            :items="expressStatus"
+            v-model="curStatus"
+            @change="_listAllOrder"
+            label="状态"
+          ></v-select>
+        </template>
+
+        <template v-slot:[`item.status`]="{ item }">
+          {{expressStatus[item.status] ? expressStatus[item.status] : '订单异常'}}
+        </template>
         
         <template v-slot:[`item.actions`]="{ item }">
           <v-btn 
             small
             dark
             class="mx-2"
-            @click="">
+            @click="checkExpressDetails(item)">
           <v-icon
             small
             class="mr-2"
@@ -218,7 +233,7 @@
           <v-pagination
             v-model="curPage"
             :length="totalPages"
-            @input=""
+            @input="_listAllOrder"
           ></v-pagination>
         </v-container>
       </div>
@@ -235,7 +250,9 @@
   import {
     getExpressSpec,
     setExpressSpec,
-    deleteExpressSpec
+    deleteExpressSpec,
+    selectOrderByOrderNumber,
+    listAllOrder
   } from '../../../../network/user';
   import toast from '../../../../components/toast';
 
@@ -248,10 +265,10 @@
             text: '用户',
             align: 'center',
             sortable: false,
-            value: 'userName',
+            value: 'addresseeName',
           },
           {
-            text: '取件码',
+            text: '订单号',
             align: 'center',
             sortable: false,
             value: 'orderNumber'
@@ -260,7 +277,8 @@
             text: '取件状态',
             align: 'center',
             sortable: false,
-            value: 'completeTime'
+            width: 200,
+            value: 'status'
           },
           {
             text: '查看详情',
@@ -294,7 +312,7 @@
         specs: [],
         search: '',
         rule: [
-          v => /^[0-9]{6, 8}$/.test(v) || '取件码必须为6~8位数字',
+          v => /^[0-9-]{15,16}$/.test(v) || '订单号必须为15~16位数字',
         ],
         nameRules: [
           v => !!v || '规格名不能为空'
@@ -311,6 +329,8 @@
         valid: false,
         specName: '',
         specPrice: 0,
+        expressStatus: ['待接单', '待送达', '已完成', '已退款', '已取消'],
+        curStatus: '待接单',
 
         date: new Date().toISOString().substr(0, 10),
         maxDate: new Date().toISOString().substr(0, 10),
@@ -325,37 +345,60 @@
     components: {
       toast
     },
-    mounted() {
-      this.topManager && getAllCampus().then(res => {
+    async mounted() {
+      this.topManager && await getAllCampus().then(res => {
         if(res.code === H_config.STATECODE_SUCCESS) {
           this.campus.push(...res.data.map(item => item.campusName))
           this.ggCampusSelectValue = this.campus[0]
+          this.campusSelectValue = this.campus[0]
         }
       })
+
+      this._listAllOrder()
     },
     methods: {
-      // _getOrderByOrderNum() {
-      //   getOrderByOrderNum({
-      //     orderNumber: this.search
-      //   }).then(res => {
-      //     if(res.code === H_config.STATECODE_getOrderByOrderNum_SUCCESS) {
-      //       this.orders = []
-      //       this.orders.push(res.data)
-      //       this.$refs.toast.setAlert('查询成功')
-      //     } else if(res.code === H_config.STATECODE_getOrderByOrderNum_FAILED) {
-      //       this.$refs.toast.setAlert(res.msg, 'primary')
-      //     } else {
-      //       this.$refs.toast.setAlert('查询失败', 'error')
-      //     }
-      //   })
-      // },
-      // checkOrderDetails(item) {
-      //   this.$store.commit('updateOrder', item)
-      //   this.$router.push('searchOrder/orderDetails')
-      // },
+      _listAllOrder() {
+        listAllOrder({
+          campus: this.topManager ? this.campusSelectValue : localStorage.getItem('campusAddress'),
+          date: this.date,
+          pageNumber: this.curPage,
+          pageSize: 10,
+          status: this.expressStatus.indexOf(this.curStatus)
+        }).then(res => {
+          console.log(res);
+          if(res.code === 3200) {
+            this.totalPages = res.data.pages || 1
+            this.express = res.data.list
+          } else {
+            this.$refs.toast.setAlert('查询失败', 'error')
+          }
+        })
+      },
+      _selectOrderByOrderNumber() {
+        selectOrderByOrderNumber({
+          orderNumber: this.search,
+          campus: this.topManager ? '' : localStorage.getItem('campusAddress')
+        }).then(res => {
+          if(res.code === 3200) {
+            this.express = [res.data]
+            this.$refs.toast.setAlert('查询成功')
+          } else {
+            this.$refs.toast.setAlert('查询失败', 'error')
+          }
+        })
+      },
+      changeDate() {
+        this.$refs.dialog.save(this.date)
+        this._listAllOrder()
+      },
+      checkExpressDetails(item) {
+        console.log(item);
+        this.$store.commit('updateExpressOrder', item)
+        this.$router.push('express/expressDetails')
+      },
       getSpec() {
         getExpressSpec({
-          campus: this.ggCampusSelectValue
+          campus: this.topManager ? this.ggCampusSelectValue : localStorage.getItem('campusAddress')
         }).then(res => {
           if(res.code === H_config.STATECODE_express_SUCCESS) {
             this.specs = res.data
@@ -369,7 +412,7 @@
         const expressAgentPrice = JSON.stringify({
           specifications: this.specName,
           price: Number(this.specPrice),
-          campus: this.ggCampusSelectValue
+          campus: this.topManager ? this.ggCampusSelectValue : localStorage.getItem('campusAddress')
         })
         setExpressSpec(expressAgentPrice).then(res => {
           console.log(res);

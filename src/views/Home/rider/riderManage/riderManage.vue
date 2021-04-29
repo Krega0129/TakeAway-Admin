@@ -29,7 +29,7 @@
           <v-spacer></v-spacer>
 
           <v-select
-            v-if="$store.state.topManager"
+            v-if="topManager"
             dense
             class="mt-6 mr-5"
             :items="campus"
@@ -53,7 +53,7 @@
 
           <v-dialog v-model="dialog" max-width="500px">
             <v-card>
-              <v-card-title class="headline">确定{{riders[editIndex] ? riders[editIndex].driverStatus == 3 ? '解封' : '封停' : '' }}该骑手?</v-card-title>
+              <v-card-title class="headline">确定{{riders[editIndex] ? riders[editIndex].driverStatus === 2553 ? '解封' : '封停' : '' }}该骑手?</v-card-title>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="closeDialog">取消</v-btn>
@@ -66,10 +66,10 @@
       </template>
 
       <template v-slot:[`item.driverIdentity`]="{ item }">
-        {{item.driverStatus == 1 ? '外卖骑手' : '快递骑手'}}
+        {{item.driverIdentity === 1 ? '外卖骑手' : '快递骑手'}}
       </template>
       <template v-slot:[`item.driverStatus`]="{ item }">
-        {{item.driverStatus == 3 ? '已封停' : '正常'}}
+        {{item.driverStatus === 2553 ? '已封停' : '正常'}}
       </template>
       
       <template v-slot:[`item.actions`]="{ item }">
@@ -89,16 +89,16 @@
 
         <v-btn 
           small
-          :color="item.driverStatus == 3 ? 'success' : 'error'"
+          :color="item.driverStatus === 2553 ? 'success' : 'error'"
           class="mx-2"
           @click="openDialog(item)">
         <v-icon
           small
           class="mr-2"
         >
-          mdi-{{item.driverStatus == 3 ? 'check' : 'block-helper'}}
+          mdi-{{item.driverStatus === 2553 ? 'check' : 'block-helper'}}
         </v-icon>
-          {{item.driverStatus == 3 ? '解封骑手' : '封停骑手'}}
+          {{item.driverStatus === 2553 ? '解封骑手' : '封停骑手'}}
         </v-btn>
       </template>
     </v-data-table>
@@ -122,6 +122,7 @@ export default {
   name: 'riderManage',
   data() {
     return {
+      topManager: localStorage.getItem('campusAddress') === '管理员',
       headers: [
         {
           text: '姓名',
@@ -177,7 +178,7 @@ export default {
     toast
   },
   async mounted() {
-    await getAllCampus().then(res => {
+    this.topManager && await getAllCampus().then(res => {
       if(res.code == H_config.STATECODE_campus_SUCCESS) {
         for(let school of res.data) {
           this.campus.push(school.campusName)
@@ -218,8 +219,8 @@ export default {
     },
     _getAllRiders() {
       getRiderByStatus({
-        campusName: localStorage.getItem('campusAddress') === '管理员' ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress'),
-        driverStatus: this.selectStatusVal === '全部' ? '' : this.selectStatusVal === '正常' ? 1 : 3
+        campusName: this.topManager ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress'),
+        driverStatus: this.selectStatusVal === '全部' ? '' : this.selectStatusVal === '正常' ? 2551 : 2553
       }).then(res => {
         if(res.code == H_config.STATECODE_rider_SUCCESS) {
           this.riders = res.data
@@ -237,10 +238,10 @@ export default {
     updateBanStatus() {
       updateReviewStatus({
         driverId: this.riders[this.editIndex].driverId,
-        driverStatus: this.riders[this.editIndex].driverStatus == 3 ? 1 : 3
+        driverStatus: this.riders[this.editIndex].driverStatus === 2553 ? 2551 : 2553
       }).then(res => {
         if(res.code == H_config.STATECODE_rider_SUCCESS) {
-          this.riders[this.editIndex].driverStatus = this.riders[this.editIndex].driverStatus == 3 ? 1 : 3
+          this.riders[this.editIndex].driverStatus = this.riders[this.editIndex].driverStatus === 2553 ? 2551 : 2553
           if(this.selectStatusVal !== '全部') {
             this.riders.splice(this.editIndex, 1)
           }

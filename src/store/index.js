@@ -21,7 +21,9 @@ export default new Vuex.Store({
 
     order: {},
 
-    shareCampus: {}
+    shareCampus: {},
+
+    expressDetails: {}
   },
   mutations: {
     login(state, payload) {
@@ -31,9 +33,9 @@ export default new Vuex.Store({
       state.shopOldInfo = payload.shopOldInfo
       state.shopNewInfo = payload.shopNewInfo
     },
-    // updateShopList(state, payload) {
-    //   state.shopList = payload
-    // },
+    updateExpressOrder(state, payload) {
+      state.expressDetails = payload
+    },
     updateCurrentShop(state, payload) {
       state.currentShop = payload.shop
       state.shopReviewStatus = payload.status

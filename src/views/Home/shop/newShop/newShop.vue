@@ -43,7 +43,7 @@
           ></v-select>
 
           <v-select
-            v-if="$store.state.topManager"
+            v-if="topManager"
             dense
             class="mt-6"
             :items="campus"
@@ -156,6 +156,7 @@
     name: 'newShop',
     data() {
       return {
+        topManager: localStorage.getItem('campusAddress') === '管理员',
         selected: [],
         singleSelect: false,
         multiSelect: false,
@@ -198,9 +199,8 @@
       toast,
       imgDialog
     },
-    mounted() {
-      this._getShop()
-      getAllCampus().then(res => {
+    async mounted() {
+      this.topManager && await getAllCampus().then(res => {
         if(res && res.code == H_config.STATECODE_campus_SUCCESS) {
           console.log(res);
           let campusList = res.data
@@ -211,6 +211,7 @@
           this.$refs.toast.setAlert('网络异常', 'error')
         }
       })
+      this._getShop()
     },
     watch: {
       selected (val) {
@@ -244,7 +245,7 @@
       _getShop() {
         getShop({
           auditStatus: this.statusSelectIndex,
-          address: this.$store.state.topManager ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : this.$store.state.topManager
+          address: this.topManager ? this.selectCampusVal =='全部校区' ? '' : this.selectCampusVal : localStorage.getItem('campusAddress')
         }).then(res => {
           if(res && res.code == H_config.STATECODE_get_SUCCESS) {
             // this.$store.commit('updateShopList', res.data)

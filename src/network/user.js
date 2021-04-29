@@ -54,3 +54,29 @@ export function deleteExpressSpec(data) {
     params: data,
   })
 }
+
+// 获取所有快递订单
+export function listAllOrder(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_listAllOrder_URL, 
+    data: JSON.stringify(data),
+    headers: {
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
+    }
+  })
+}
+
+// 根据订单号查询快递订单
+export function selectOrderByOrderNumber(data) {
+  return axios({
+    method: 'post',
+    url: H_config.API_selectOrderByOrderNumber_URL, 
+    data: data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      //'Content-Type': 'application/json',
+    }
+  })
+}
